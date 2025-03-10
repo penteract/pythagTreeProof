@@ -1,0 +1,11 @@
+
+
+If you're working with components of pairs, deconstruct the pairs as soon as possible.
+  obtain ⟨w,z⟩ := pt
+
+To finish off inequalities:
+  norm_num  -- ( turns 0.5 and 2⁻¹ into 1/2 ; without this, bound doesn't work; may needs to be used at hypotheses too)
+  bound
+
+
+To rewrite something involving a bound variable, use simp instead of rw
