@@ -166,7 +166,7 @@ theorem vol_sq {c : ℝ×ℝ } {sz : NNReal} : volume (square c sz) = Real.toNNR
   simp
   rw [←NNReal.coe_mul,←ENNReal.coe_mul, Real.toNNReal_coe]
 
-theorem vol_unit_sq: volume usq = 1 := by
+theorem vol_usq: volume usq = 1 := by
   unfold usq
   rw [vol_sq]
   simp only [NNReal.coe_one, mul_one, toNNReal_one, ENNReal.coe_one]
@@ -225,7 +225,7 @@ theorem sq_cors {c  : ℝ×ℝ} {sz : NNReal} {i : Cor} : corTransform i '' (squ
     -- bound
   ))
 
-theorem cor_disj : Pairwise (Disjoint on fun i ↦ (fun i s ↦ ⇑(corTransform i) '' s) i usq) := by
+theorem cor_disj : Pairwise (Disjoint on fun i ↦ ⇑(corTransform i) '' usq) := by
   intro i j
   intro h
   --apply Set.disjoint_iff_inter_eq_empty.mpr
@@ -258,5 +258,7 @@ theorem test : False := by
   #check exists_eq_right
   sorry
 
+theorem square_has_4_corners : Fintype.card Cor = 4 := by
+  rfl
 
 end SquareDiv

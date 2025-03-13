@@ -49,7 +49,7 @@ theorem volume_sum_pieces (f : ι → Set α)
   -- and A is a subset of S
   { asub : A ⊆ S}
   -- and t i (f i) combine make A (except for a measure zero bit)
-  (aparts : ∀ i , (A ∩ t i S) =  t i (f i)) :
+  {aparts : ∀ i , (A ∩ t i S) =  t i (f i)} :
   -- then the volume of the pieces is the volume of A
   volume A = ∑' i, volume (t i (f i)) := by
   --simp
@@ -121,6 +121,11 @@ theorem volume_sum_pieces (f : ι → Set α)
     _ = volume (A ∩ ⋃ i, t i S) := by
       rw [mz]
       ring
+
+
+-- TODO: same as above , but with finset ι and
+--useful: exists_measurable_superset_of_null
+--        measure_inter_add_diff₀
 
 /-
 theorem volume_sum_piecesInf (f : ι → Set S) :

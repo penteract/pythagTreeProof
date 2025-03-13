@@ -6,28 +6,16 @@ open Real
 open ENNReal
 open NNReal
 open Set
-open SquareDiv
 
 open Lean.Parser.Tactic
 open Lean
-/-
-instance : Coe (TSyntax ``locationHyp) (TSyntax `ident) where
-  coe s := match s.raw with
-    | (Syntax.node info `Lean.Parser.Tactic.locationHyp
-                  #[(Syntax.node info2 `null #[t]
-                    --(Syntax.ident info "i".toSubstring' (addMacroScope mainModule `i scp) [])
-                      ),
-                  (Syntax.node info3 `null #[])])  => ⟨ t ⟩
-    | _ => ⟨s⟩
--/
 
 
-macro "norm_bound" : tactic => `(tactic| (norm_num ; bound))
+-- macro "norm_bound" : tactic => `(tactic| (norm_num ; bound))
 
 
+-- minimal setup for theorem statement (does not depend on SquareDiv)
 def d0 (p : (ℝ × ℝ)) := (p.1*0.5, p.2*0.5+0.5)
-
-
 
 -- ((p.1 - p.2) * 0.5 , (p.1 + p.2) * 0.5 + 1 )
 
@@ -48,9 +36,13 @@ def triFun_m : Set (ℝ × ℝ) →o Set (ℝ × ℝ) := ⟨ triFun , triFun_mon
 
 def triangle := lfp triFun_m
 
+-- Main theorem
 theorem tri_area : MeasureTheory.volume triangle = 1 / 2
  := by
   sorry
+
+-- Proof
+open SquareDiv
 
 theorem d0homothety : d0  = (AffineMap.homothety (0 ,1)  (0.5 : ℝ ) ) := by
   funext p
@@ -99,7 +91,7 @@ lemma obv3 {a:ℝ}: a/4*2 = a/2 := by
   bound
 
 def triCor (c : Cor) : Set (ℝ×ℝ) := match c with
-  | Cor.bl => unit_sq
+  | Cor.bl => usq
   | Cor.br => triangle
   | Cor.tl => triangle
   | Cor.tr => ∅
@@ -142,7 +134,7 @@ lemma tri_h : triangle = triFun triangle := by
   symm
   exact (OrderHom.map_lfp triFun_m)
 
-
+/-
 lemma d1eq : d1 = (fun a ↦ (2⁻¹ : ℝ) • a + (2⁻¹, 0)) := by
   unfold d1
   ext x <;>(
@@ -156,15 +148,22 @@ lemma d0eq : d0 = (fun a ↦ (2⁻¹ : ℝ) • a + (0,2⁻¹)) := by
     simp
     norm_num
     bound
-  )
-
+  ) -/
 lemma d1_br : d1 = corTransform Cor.br := by
-  simp [corTransform]
-  exact d1eq
+  unfold d1
+  ext x <;>(
+    simp [corTransform]
+    norm_num
+    bound
+  )
 lemma d0_tl : d0 = corTransform Cor.tl := by
-  simp [corTransform]
-  exact d0eq
-
+  unfold d0
+  ext x <;>(
+    simp [corTransform]
+    norm_num
+    bound
+  )
+/-
 lemma cor_bl_sq : cor_sq = corTransform Cor.bl '' unit_sq := by
   ext ⟨ x,y⟩
   have h : ⇑(corTransform Cor.bl) = (fun (p : (ℝ × ℝ)) => (p.1*0.5, p.2*0.5)) := by
@@ -179,7 +178,7 @@ lemma cor_bl_sq : cor_sq = corTransform Cor.bl '' unit_sq := by
   sorry
 
   --bound
-
+-/
 variable (α : Type)
 variable (a b c : Set α)
 
@@ -198,10 +197,10 @@ macro "rw_pair" i:(ident) : tactic =>
       )) -/
 
 -- lemma fpreImim (f : ) : f ⁻¹' (f '' s
-lemma tri_in_sq : triangle ⊆ unit_sq := by
-  apply (@lfp_induction _ _ (triFun_m) (fun x => x ⊆ unit_sq))
+lemma tri_in_sq : triangle ⊆ usq := by
+  apply (@lfp_induction _ _ (triFun_m) (fun x => x ⊆ usq))
   . intro a h _ ⟨x,y⟩ ht
-    unfold unit_sq
+    unfold usq square
     simp
     cases' ht with q q
     cases' q with q q <;>
@@ -211,7 +210,7 @@ lemma tri_in_sq : triangle ⊆ unit_sq := by
       obtain ⟨q,rr⟩ := q
       obtain ⟨ aa,bb⟩ := rr
       apply h at q
-      unfold unit_sq at q
+      unfold usq square at q
       simp at q
       norm_num
       bound
@@ -223,10 +222,10 @@ lemma tri_in_sq : triangle ⊆ unit_sq := by
 
   intro s
   exact sSup_le
-
-lemma d1_disj_d0 : (d0 '' unit_sq) ∩ (d1 '' unit_sq) = ∅ := by
+/-
+lemma d1_disj_d0 : (d0 '' usq) ∩ (d1 '' usq) = ∅ := by
   ext  ⟨ x,y⟩
-  simp [d0,d1,unit_sq]
+  simp [d0,d1,usq,square]
   norm_num
   bound
 lemma cor_disj_d1 : (cor_sq) ∩ (d1 '' unit_sq) = ∅ := by
@@ -258,39 +257,83 @@ lemma d0_disj_d1t : (d1 '' triangle) ∩ (d0 '' unit_sq) = ∅ := by
   apply inter_subset_inter_right
   exact (image_mono tri_in_sq)
   rw [d1_disj_d0]
-
-lemma tri_h2 : (triangle ∩ ⇑(corTransform Cor.br) '' unit_sq = ⇑(corTransform Cor.br) '' triCor Cor.br)
-             ∧ (triangle ∩ ⇑(corTransform Cor.tl) '' unit_sq = ⇑(corTransform Cor.tl) '' triCor Cor.tl)
+-/
+lemma cor_sq_eq_square : cor_sq = square (0,0) (1/2) := by
+  unfold square cor_sq
+  ext ⟨ x,y⟩
+  norm_num
+  bound
+lemma cor_sq_eq_bl_usq : cor_sq = (corTransform Cor.bl) '' usq  := by
+  unfold usq
+  rw [sq_cors]
+  rw [cor_sq_eq_square]
+  unfold corTransform
+  simp
+lemma pairwise_empty_subset {a b : Cor} (h : a ≠ b) : corTransform a '' usq ∩ corTransform b '' usq = ∅ :=
+          disjoint_iff_inter_eq_empty.mp (cor_disj h)
+lemma tri_inter_sq_empty {a b : Cor} (h : a ≠ b) : corTransform a '' triangle ∩ corTransform b '' usq = ∅ :=
+  subset_empty_iff.mp (Subset.trans
+    (inter_subset_inter_left _ (image_mono tri_in_sq))
+    (subset_empty_iff.mpr (pairwise_empty_subset h)))
+lemma tri_cor_eq_triCor : (triangle ∩ ⇑(corTransform Cor.br) '' usq = ⇑(corTransform Cor.br) '' triCor Cor.br)
+             ∧ (triangle ∩ ⇑(corTransform Cor.tl) '' usq = ⇑(corTransform Cor.tl) '' triCor Cor.tl)
   := by
-  have h : triangle ⊆ unit_sq := tri_in_sq
+  have h : triangle ⊆ usq := tri_in_sq
   apply And.intro <;> (
+    -- simp only [← d0_tl,← d1_br]
     unfold triCor
-    unfold corTransform
+
+    --unfold corTransform
     simp
     nth_rewrite 1 [tri_h]
     unfold triFun
-
-    simp only [← d0eq,← d1eq]
+    rw[d0_tl,d1_br]
+    --simp only [← d0eq,← d1eq]
     rw [union_inter_distrib_right]
     rw [union_inter_distrib_right]
     apply subset_antisymm
 
     -- unfold image
-    . simp [d0t_disj_d1, d0_disj_d1t, cor_disj_d1, cor_disj_d0]
+    . rw [cor_sq_eq_bl_usq]
+      --transitivity ∅
+      --swap
+      --exact empty_subset _
+      simp
+      .
+        /-by
+          exact subset_empty_iff.mp (Subset.trans (inter_subset_inter_left _ (image_mono tri_in_sq)) (subset_empty_iff.mpr (pairwise_empty_subset h)))
+          apply subset_empty_iff.mp (Subset.trans (inter_subset_inter_left _ (image_mono tri_in_sq)) (subset_empty_iff.mpr (pairwise_empty_subset h)))
+                    --#check inter_subset_inter_left
+          --simp [inter_subset_inter_left,image_mono tri_in_sq]
+          exact
+          -- exact (image_mono tri_in_sq
+          -/
+        simp [tri_inter_sq_empty (by simp : Cor.br ≠ Cor.tl),
+              tri_inter_sq_empty (by simp : Cor.tl ≠ Cor.br),
+              pairwise_empty_subset (by simp : Cor.bl ≠ Cor.br),
+              pairwise_empty_subset (by simp : Cor.bl ≠ Cor.tl)]
+      --simp [d0t_disj_d1, d0_disj_d1t, cor_disj_d1, cor_disj_d0]
     . rw [inter_eq_left.mpr (image_mono h)]
       try exact (subset_trans subset_union_right subset_union_left)
       try exact (subset_trans subset_union_left subset_union_left)
     )
-
-lemma tri_tr_empty : triangle ∩ ⇑(corTransform Cor.tr) '' unit_sq = ∅ := by
-  simp [corTransform,]
-
+/-
+lemma tri_tr_empty : triangle ∩ ⇑(corTransform Cor.tr) '' usq = ∅ := by
+  rw [tri_h]
+  unfold triFun
+  apply subset_empty_iff.mp
+  sorry
+-/
 
 lemma tri_area_lem : MeasureTheory.volume triangle = MeasureTheory.volume triangle / 2 + 1/4 := by
-  #check volume_sum_pieces (S := unit_sq) (A := triangle) (t:= fun i s => corTransform i '' s) triCor
-  nth_rewrite 1 [volume_sum_pieces (S := unit_sq) (A := triangle) (t:= fun i s => corTransform i '' s) triCor]
+  have vol_usq : MeasureTheory.volume usq = 1 := by
+    simp [usq,vol_sq]
+  -- #check volume_sum_pieces (S := usq) (A := triangle) (t:= fun i s => corTransform i '' s) triCor
+  -- have cor_disj_unit_sq := cor_disj
+  -- rw [← unit_sq_eq_usq] at cor_disj_unit_sq
+  nth_rewrite 1 [volume_sum_pieces (S := usq) (A := triangle) (t:= fun i s => corTransform i '' s) triCor]
   rw [tsum_fintype]
-  simp
+  --simp
   --unfold Finset.sum
   --simp
   unfold Finset.univ
@@ -298,30 +341,97 @@ lemma tri_area_lem : MeasureTheory.volume triangle = MeasureTheory.volume triang
   repeat rw [vol_quater]
   unfold triCor
   simp
-  norm_num
-  have h : MeasureTheory.volume unit_sq = 1 := by sorry
-  rw [h]
+  --norm_num
+  rw [vol_usq]
   norm_num
   let hh := obv2 (MeasureTheory.volume triangle)
   rw [← hh,add_comm]
-
+  --norm_num
   ring
+  . rw [vol_usq]; exact one_lt_top
+  . simp
+    intro i
+    rw [← image_subset_iff]
+    unfold usq
+    rw [sq_cors]
+    cases i <;>(
+      simp [corTransform, square]
+      try (
+        rw [prod_subset_prod_iff]
+        apply Or.inl
+        apply And.intro
+      )
+    )<;>(
+      -- unfold Ioo
+      intro x
+      simp
+      norm_num
+      bound
+    )
+  . simp
+    unfold usq
+    simp [sq_cors]
+    simp [vol_sq]
+    norm_num
+    have h1 := NNReal.tsum_eq_toNNReal_tsum (f:=fun (i:Cor) =>  (↑(1 / 4 : ENNReal).toNNReal))
+    have h2 := NNReal.tsum_eq_toNNReal_tsum (f:=fun (i:Cor) =>  1 / 4)
+    symm
+    rw [← toNNReal_eq_one_iff]
+    rw [← NNReal.tsum_eq_toNNReal_tsum]
+
+    -- let a := Real.toNNReal (1/4)
+    -- have ha : a = Real.toNNReal (4⁻¹) := by simp [a]
+    -- simp [← ha]
+    rw [← NNReal.coe_inj,NNReal.coe_one,NNReal.coe_tsum]
+    rw [Real.coe_toNNReal]
+    rw [tsum_const (1/4)]
+    simp
+    rw [square_has_4_corners]
+    simp
+    simp
+    /-
+    simp [Cor]
+    rw [← h1]
+    have h3 : ↑(∑' (b : Cor), (1 / 4 : ENNReal).toNNReal) = ↑ ((∑' (b : Cor), (↑((1 / 4 : ENNReal).toNNReal) : ENNReal)).toNNReal) := by
+      rw [← toNNReal_eq_toNNReal_iff']
+      --something using h1???
+
+    rw [(sorry : 1 = (1:ENNReal).toNNReal)]
+    have h : ∑' (b : Cor), (( ↑(1 / 4 : ENNReal).toNNReal) : ENNReal) =
+             (∑' (b : Cor), ↑((1/4) : ENNReal).toNNReal ) := by
+             have h' := NNReal.tsum_eq_toNNReal_tsum (f:=fun (i:Cor) =>  (↑(1 / 4 : ENNReal).toNNReal))
+
+
+             exact NNReal.tsum_eq_toNNReal_tsum (f:= )
+
+
+    (↑(1 / 4 : ENNReal).toNNReal) := NNReal.tsum_eq_toNNReal_tsum (f:=fun (i:Cor) =>  (↑(1 / 4 : ENNReal).toNNReal))
+    rw [h]
+    symm
+    transitivity (Nat.card Cor)*↑(1 / 4)
+    apply tsum_const
+    -/
+  . exact cor_disj
+  . simp
+    unfold usq
+    intro i
+    rw [sq_cors]
+    unfold square
+    exact MeasurableSet.prod measurableSet_Ioo measurableSet_Ioo
+  . sorry
+  . exact tri_in_sq
+
   intro i
   cases i
   . unfold triCor
-    unfold corTransform
+    simp only []
+    apply inter_eq_right.mpr
+    rw [tri_h]
+    unfold triFun
+    rw [← cor_sq_eq_bl_usq]
     simp
-    unfold triangle
-    transitivity (⇑(((0.5 :ℝ ) • LinearMap.id) : ℝ×ℝ →ₗ[ℝ] ℝ×ℝ) ⁻¹' (triFun_m ∅))
-    simp [triFun_m,triFun,cor_sq]
-    intro ⟨ x,y ⟩
-    norm_num
-    bound
-    norm_num
-    apply Set.preimage_mono
-    apply OrderHom.map_le_lfp triFun_m (Set.empty_subset _)
-  . exact tri_h2.1
-  . exact tri_h2.2
+  . exact tri_cor_eq_triCor.1
+  . exact tri_cor_eq_triCor.2
   . rw [tri_h]
     unfold triFun
     transitivity ∅
@@ -329,25 +439,18 @@ lemma tri_area_lem : MeasureTheory.volume triangle = MeasureTheory.volume triang
     unfold triCor corTransform
     simp
     apply subset_empty_iff.mp
-    have h := cor_disj
-    simp [Pairwise,Function.onFun] at h
+    --simp [Pairwise,Function.onFun] at cor_disj_unit_sq
     -- #check (h (Cor.tl≠ Cor.tr)
-    rw [union_inter_distrib_right,union_inter_distrib_right, d1_br, d0_tl,cor_bl_sq]
+    rw [union_inter_distrib_right,union_inter_distrib_right, d1_br, d0_tl,cor_sq_eq_bl_usq]
     ( apply union_subset
       apply union_subset <;>
         apply subset_trans (inter_subset_inter_left _ (image_mono tri_in_sq))
     )<;>(
       simp
       apply Set.disjoint_iff_inter_eq_empty.mp
-      simp_all only [not_false_eq_true]
+      have h:=cor_disj
+      simp_all [Pairwise,not_false_eq_true]
     )
-  . sorry
-  . sorry
-  . sorry
-  . exact cor_disj
-  . sorry
-  . sorry
-  . exact tri_in_sq
 
 
     /-
@@ -394,7 +497,36 @@ lemma tri_area_lem : MeasureTheory.volume triangle = MeasureTheory.volume triang
     simp_all only [le_eq_subset, subset_union_right]
     -/
 
+theorem obv6 {a : ENNReal} (h1: a=a/2+1/4) (h2 :a<⊤) : a=1/2 := by
+  cases' a with x
+  contradiction
+  rw [← coe_ofNat] at h1
+  rw [← (coe_ofNat)] at h1
+  rw [← ENNReal.coe_one] at h1
+  rw [← ENNReal.coe_div] at h1
+  rw [← ENNReal.coe_div] at h1
+  rw [← ENNReal.coe_add] at h1
+  rw [← (coe_ofNat)]
+  rw [← ENNReal.coe_one]
+  rw [← ENNReal.coe_div]
+  apply ENNReal.coe_inj.mpr
+  apply ENNReal.coe_inj.mp at h1
+  apply NNReal.coe_inj.mp
+  apply NNReal.coe_inj.mpr at h1
+  simp at h1
+  norm_num at h1
+  simp
+  norm_num
+  bound
+  simp
+  simp
+  simp
 
+theorem tri_area_final : MeasureTheory.volume triangle = 1/2 := by
+  apply obv6 tri_area_lem
+  apply (MeasureTheory.measure_lt_top_of_subset tri_in_sq)
+  rw [vol_usq]
+  exact one_ne_top
 
 
 

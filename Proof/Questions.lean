@@ -14,7 +14,6 @@ noncomputable def d0_lin : ℝ × ℝ  →ₗ[ℝ] ℝ × ℝ := Matrix.toLin (B
 --   "Although Set is defined as α → Prop, this is an implementation detail which should not be relied on"
 
 
-
 -- why do some of the following fail
 variable (A B : Set α)
 theorem t (s: A ⊆ B) (f : Set α → Set α) :
@@ -33,6 +32,15 @@ theorem t (s: A ⊆ B) (f : Set α → Set α) :
       let a : B ∩ A = A := (inf_of_le_right s)
       rw [a]
 
+theorem rw_under_quantifier {x:ℝ }: ∃ y : ℝ, x<0 ∧ (2⁻¹ * x=y) ∨ (2⁻¹ * y=x) := by
+    have h {a b:ℝ }:2⁻¹ * a = b ↔ a = 2*b := by norm_num; bound
+    rw [(by norm_num;bound : (q:ℝ) →  2⁻¹ * q  = q/2)]
+    -- Why can't it rewrite
+    --rw [(by norm_num;bound : (q:ℝ) →  2⁻¹ * q  = q/2)]
+    -- answer: use simp
+    simp [(by norm_num;bound : (q:ℝ) →  2⁻¹ * q  = q/2)]
+    erw [(sorry : (q:ℝ) →  2⁻¹ * q  = q/2)]
+    erw [h]
 
 -- no coercion from pairs to pairs
 
