@@ -44,6 +44,11 @@ theorem rw_under_quantifier {x:ℝ }: ∃ y : ℝ, x<0 ∧ (2⁻¹ * x=y) ∨ (2
 
 -- no coercion from pairs to pairs
 
+theorem tt {A : Set ℝ} {ι : Type*} {i : ι} {s : Set ι} {S : Set ℝ} {t : ι → Set ℝ → Set ℝ}:
+  MeasureTheory.volume (A ∩ ((⋃ x ∈ s, t x S) \ (⋃ x ∈ (Singleton.singleton i), t x S))) =
+  MeasureTheory.volume (A ∩ (⋃ x ∈ (s \ {i}), t x S)) := by
+
+  rw [biUnion_diff_biUnion_eq (s:=s) (t:={i}) (f:=(fun j => t j S))]
 
 -- What is the difference between:
 --  variable {iotaFinite : Fintype ι}
@@ -59,6 +64,11 @@ inductive Cor : Type where
   deriving DecidableEq
 
 instance Cor.fintype : Fintype Cor := ⟨ ⟨ {bl,br,tl,tr}, by simp⟩ , fun x => by cases x <;> simp⟩
+
+theorem R2Caratheodory {s : Set (ℝ×ℝ) } {t : Set (ℝ×ℝ) } (h : MeasurableSet s) :
+    MeasureTheory.volume s = MeasureTheory.volume (t ∩ s) + MeasureTheory.volume (t \ s) := by
+  sorry
+
 
 open Real
 open AffineMap
@@ -88,3 +98,13 @@ lemma cor : cor_sq = corTransform Cor.bl '' unit_sq := by
   norm_num
 
   bound
+
+-- induction on finite sets
+--lemma lem_fin {ι : Type*} [Finite ι] (p : Set ι → Prop) (ih : ∀ (s: Set ι), ∀x : ι, (x∉s) → p s → p (insert x a))  : s ⊆ := by
+  --sorry
+  -- Set.Finite.induction_to_univ
+
+-- openClassical
+noncomputable def notunivchoice (nottop : A≠Set.univ) : α := by
+  --exact Classical.choice (Set.nonempty_compl.mpr nottop)
+  exact Set.Nonempty.some (Set.nonempty_compl.mpr nottop)
