@@ -482,8 +482,6 @@ lemma tri_area_lem : MeasureTheory.volume triangle = MeasureTheory.volume triang
     simp [sq_cors]
     simp [vol_sq]
     norm_num
-    have h1 := NNReal.tsum_eq_toNNReal_tsum (f:=fun (i:Cor) =>  (↑(1 / 4 : ENNReal).toNNReal))
-    have h2 := NNReal.tsum_eq_toNNReal_tsum (f:=fun (i:Cor) =>  1 / 4)
     symm
     rw [← toNNReal_eq_one_iff]
     rw [← NNReal.tsum_eq_toNNReal_tsum]

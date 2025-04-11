@@ -31,9 +31,9 @@ noncomputable def corTransform (cor : Cor) : (R2 →ᵃ[ℝ] R2) := match cor wi
   | Cor.tr => LinearMap.toAffineMap ((1/2 : ℝ ) • LinearMap.id)
                 + (AffineMap.const ℝ R2 (1/2,1/2))
 
-theorem vol_quater {x: Set R2} {cor : Cor} : MeasureTheory.volume (corTransform cor '' x) = MeasureTheory.volume x /4 := sorry
 
-theorem corners_disj : Pairwise (Disjoint on (λ c:Cor => corTransform c '' unit_sq ) ) := sorry
+
+/- theorem corners_disj : Pairwise (Disjoint on (λ c:Cor => corTransform c '' unit_sq ) ) := sorry -/
 
 inductive Rot : Type where
   | none : Rot
@@ -45,10 +45,10 @@ def rinv (r:Rot): Rot := match r with
   | Rot.left => Rot.right
   | Rot.right => Rot.left
   | _ => r
-
+/-
 def rcor (r : Rot) (c : Cor) : Cor :=
   sorry
-
+-/
 
 -- Tranformation (rotate about (1/2,1/2)) sending unit_sq to unitsq
 noncomputable def rotTransform (rot : Rot) : (R2 →ᵃ[ℝ] R2) := match rot with
@@ -65,7 +65,7 @@ noncomputable def rotTransform (rot : Rot) : (R2 →ᵃ[ℝ] R2) := match rot wi
                 <| AffineMap.comp (LinearMap.toAffineMap (
                      Matrix.toLin (Basis.finTwoProd _) (Basis.finTwoProd _) !![0, 1 ; -1, 0 ] ))
                 (AffineMap.const ℝ R2 (-1/2,-1/2))
-
+/-
 theorem rinv_consistent : rotTransform r (rotTransform (rinv r) x) = x := by
   sorry
 
@@ -77,8 +77,8 @@ theorem thm_rot {rot:Rot}: rotTransform rot '' unit_sq = unit_sq := by
   )-/
   sorry
 
-
 theorem rcor_consistent {rot : Rot} {cor : Cor} : rotTransform rot '' (corTransform cor '' unit_sq) = corTransform (rcor rot cor) '' unit_sq := by sorry
+-/
 
 inductive Piece : Type
   | triangle :  Piece -- triangle is bottom left half of unit_sq
@@ -93,57 +93,33 @@ def triangleMap (cor:Cor) : Piece := match cor with
   | Cor.tr => Piece.emptyPiece
   | _ => Piece.triangle -/
 
+theorem corTransform_homothety (i: Cor) : corTransform i = AffineMap.homothety (2 * (corTransform i (0,0))) (1/2 : ℝ ) := by
+  cases i <;> (
+    unfold corTransform
+    simp
+    unfold AffineMap.homothety
+    simp_all only [vsub_eq_sub, vadd_eq_add]
+  )
+  . ext p : 2 <;>
+      simp_all only [LinearMap.coe_toAffineMap, LinearMap.smul_apply, LinearMap.id_coe, id_eq, smul_snd, smul_eq_mul,
+        coe_add, coe_smul, coe_sub, coe_id, coe_const, Function.const_zero, sub_zero, Pi.add_apply, Pi.smul_apply,
+        Pi.zero_apply, add_zero]
+  . ext p : 2 <;>
+      simp
+    norm_num
+    bound
+  . ext p : 2 <;>
+      simp
+    norm_num
+    bound
+  . ext p : 2 <;> (
+      simp
+      norm_num
+      bound
+    )
+
 open Set
-/- set_option maxHeartbeats 1000000
-theorem cor_disj : Pairwise (Disjoint on fun i ↦ (fun i s ↦ ⇑(corTransform i) '' s) i unit_sq) := by
-  intro i j
-  checkpoint (cases' i <;>
-    cases' j <;> (
-      intro h
-      first | contradiction | (
-        apply Set.disjoint_iff_inter_eq_empty.mpr
-        ext  ⟨x,y⟩
-        unfold corTransform
-        unfold unit_sq
-        simp only []
-        simp
-        norm_num
-        bound
-        /-simp only [ne_eq, not_false_eq_true, one_div, LinearMap.coe_toAffineMap, LinearMap.smul_apply,
-          LinearMap.id_coe, id_eq, coe_add, coe_const, Pi.add_apply, Function.const_apply, mem_inter_iff, mem_image,
-          mem_setOf_eq, smul_mk, smul_eq_mul, Prod.mk.injEq, mk_add_mk, add_zero, mem_empty_iff_false,
-          iff_false, not_and, not_exists, and_imp, forall_exists_index] -/
-        --intro x_1 x_2 a a_1 a_2 a_3 a_4 a_5 x_3 x_4 a_6 a_7
-        --subst a_4 a_5
-        --simp_all only [mul_eq_mul_left_iff, inv_eq_zero, OfNat.ofNat_ne_zero, or_false]
-        --apply Aesop.BuiltinRules.not_intro
-        --intro a_4
-        --subst a_4
-        --simp_all only
-        --sorry
-        --simp_all only [ne_eq, not_false_eq_true, one_div, LinearMap.coe_toAffineMap, LinearMap.smul_apply, LinearMap.id_coe, id_eq, coe_add, coe_const, Pi.add_apply, Function.const_apply, mem_inter_iff, mem_image, mem_setOf_eq, exists,    smul_mk, smul_eq_mul, Prod.mk.injEq, mk_add_mk, add_zero, mem_empty_iff_false, iff_false, not_and, not_exists,    and_imp, forall_exists_index]
-        --norm_num
-        --bound
-          /-
-          unfold Function.onFun
-          unfold unit_sq
-          unfold Set.image
-          intro s s_le_i s_le_j ⟨a,b⟩  xins
-          unfold corTransform at s_le_i s_le_j
-          simp at s_le_i s_le_j
-          apply mem_of_mem_of_subset xins at s_le_j
-          apply mem_of_mem_of_subset xins at s_le_i-/
-        --simp at s_le_i s_le_j
-        --aesop
-        -- have? using  s_le_i xins
-        --bound
-        --bound
 
-
-        --contradiction
-      )
-    ))
--/
 def square (c :ℝ×ℝ) (sz : NNReal) := Ioo c.1 (c.1+sz) ×ˢ Ioo c.2 (c.2+sz)
 
 def usq : Set (ℝ×ℝ)  := square ⟨0, 0⟩ 1
@@ -204,7 +180,7 @@ theorem sq_cors {c  : ℝ×ℝ} {sz : NNReal} {i : Cor} : corTransform i '' (squ
     simp
     have h1 {a b:ℝ }:2⁻¹ * a = b ↔ a = 2*b := by norm_num; bound
     have h2 {a b:ℝ }:2⁻¹ * a + 2⁻¹ = b ↔ a = 2*b - 1 := by norm_num; bound
-    have h3 {a b:ℝ }:2⁻¹ = b ↔ 1 = 2*b := by norm_num; bound
+    have h3 {b:ℝ }:2⁻¹ = b ↔ 1 = 2*b := by norm_num; bound
     simp [h1,h2,h3]
     norm_num
     bound
@@ -224,6 +200,19 @@ theorem sq_cors {c  : ℝ×ℝ} {sz : NNReal} {i : Cor} : corTransform i '' (squ
     -- norm_num
     -- bound
   ))
+
+theorem vol_quater {x: Set R2} {cor : Cor} : MeasureTheory.volume (corTransform cor '' x) = MeasureTheory.volume x /4 := by
+  rw [corTransform_homothety]
+  rw [MeasureTheory.Measure.addHaar_image_homothety]
+  simp
+  norm_num
+  rw [abs_of_nonneg]
+  rw [ENNReal.ofReal_div_of_pos]
+  rw [mul_comm]
+  simp_all only [ENNReal.ofReal_one, ENNReal.ofReal_ofNat, one_div]
+  rfl
+  simp
+  simp
 
 theorem cor_disj : Pairwise (Disjoint on fun i ↦ ⇑(corTransform i) '' usq) := by
   intro i j
@@ -253,10 +242,10 @@ theorem cor_disj : Pairwise (Disjoint on fun i ↦ ⇑(corTransform i) '' usq) :
             simp [corTransform]
         )
     )
-
+/-
 theorem test : False := by
   #check exists_eq_right
-  sorry
+  sorry-/
 
 theorem square_has_4_corners : Fintype.card Cor = 4 := by
   rfl
