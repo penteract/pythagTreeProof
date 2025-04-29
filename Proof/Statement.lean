@@ -16,7 +16,8 @@ theorem constx_mono {β} {x:α} [Preorder α] [Preorder β]: Monotone (Function.
   intro _ _ _
   rfl
 
-theorem treeFun_monotone : Monotone (treeFun) := Monotone.sup (Monotone.sup monotone_image monotone_image) monotone_const
+theorem treeFun_monotone : Monotone (treeFun) :=
+  Monotone.sup (Monotone.sup monotone_image monotone_image) monotone_const
 def treeFun_m : Set (ℝ × ℝ) →o Set (ℝ × ℝ) := ⟨ treeFun , treeFun_monotone⟩
 
 def pythagTree := lfp treeFun_m

@@ -5,12 +5,58 @@ open AffineMap
 open Matrix
 open Prod
 open MeasureTheory
-
-macro "R2" : term => `(ℝ × ℝ)
+open Set
 
 namespace SquareDiv
 
-def unit_sq : Set (ℝ × ℝ) := {⟨ x , y ⟩ | 0<x ∧ x<1 ∧ 0<y ∧ y<1 }
+macro "R2" : term => `(ℝ × ℝ)
+
+
+def rect (c : ℝ × ℝ ) (w:ℝ) (h : ℝ) := Ioo c.1 (c.1+w) ×ˢ Ioo c.2 (c.2+h)
+
+def square (c :ℝ×ℝ) (sz : NNReal) := Ioo c.1 (c.1+sz) ×ˢ Ioo c.2 (c.2+sz)
+
+def usq : Set (ℝ×ℝ)  := square ⟨0, 0⟩ 1
+
+def irect (n : ℕ ) (m : ℕ) : Type := (Fin n × Fin m)
+
+-- s1 : ℤ ⨯ ℤ
+
+lemma pairne {A B : Type} {p q : A × B } (h : p ≠ q) : p.1≠ q.1 ∨ p.2 ≠ q.2 := by
+  simp [Prod.ext_iff] at h
+  -- simp
+  rw [← imp_iff_not_or]
+  trivial
+
+theorem usqs_divide_rect (n : ℕ ) (m : ℕ) :
+  PairwiseDisjoint (⊤ : Set (Fin n × Fin m)) (fun (i,j) => square ⟨i,j⟩ 1 ) := by
+  intro ⟨i,j⟩
+  intro _
+  intro ⟨x,y⟩
+  intro _
+  intro ne
+  apply pairne at ne
+  simp at ne
+  intro s ina inb p pins
+  simp
+  simp at ina inb
+  apply mem_of_mem_of_subset pins at ina
+  apply mem_of_mem_of_subset pins at inb
+  cases' ne with ne ne <;>(
+    simp at ne
+    have ne:= mt Fin.eq_of_val_eq ne
+    cases' Nat.lt_or_gt_of_ne ne with lt lt <;> (
+      have ilx1 := (Nat.le_sub_one_of_lt lt)
+      obtain ⟨a,b⟩  :=p
+      unfold square at ina inb
+      simp at ina inb
+      -- rw [← Nat.cast_le] at ilx1
+      have ilx1 : (_: ℝ) ≤ _ := Nat.cast_le.mpr ilx1
+      rw [Nat.cast_sub (Nat.one_le_of_lt lt)] at ilx1
+      simp at ilx1
+      bound
+    )
+  )
 
 inductive Cor : Type where
   | bl : Cor
@@ -35,50 +81,6 @@ noncomputable def corTransform (cor : Cor) : (R2 →ᵃ[ℝ] R2) := match cor wi
 
 /- theorem corners_disj : Pairwise (Disjoint on (λ c:Cor => corTransform c '' unit_sq ) ) := sorry -/
 
-inductive Rot : Type where
-  | none : Rot
-  | left : Rot
-  | half : Rot
-  | right : Rot
-
-def rinv (r:Rot): Rot := match r with
-  | Rot.left => Rot.right
-  | Rot.right => Rot.left
-  | _ => r
-/-
-def rcor (r : Rot) (c : Cor) : Cor :=
-  sorry
--/
-
--- Tranformation (rotate about (1/2,1/2)) sending unit_sq to unitsq
-noncomputable def rotTransform (rot : Rot) : (R2 →ᵃ[ℝ] R2) := match rot with
-  | Rot.none => AffineMap.id ℝ R2 --LinearMap.toAffineMap (LinearMap.id)
-  | Rot.left => AffineMap.comp (AffineMap.const ℝ R2 (1/2,1/2))
-                <| AffineMap.comp (LinearMap.toAffineMap (
-                     Matrix.toLin (Basis.finTwoProd _) (Basis.finTwoProd _) !![0, -1 ; 1, 0 ] ))
-                ( AffineMap.const ℝ R2 (-1/2,-1/2))
-  | Rot.half => AffineMap.comp (AffineMap.const ℝ R2 ((1/2 : ℝ) ,(1/2 : ℝ) ))
-                <| AffineMap.comp
-                  (LinearMap.toAffineMap ((-1 : ℝ ) • LinearMap.id))
-                  (AffineMap.const ℝ R2 ((-1/2 : ℝ) ,(-1/2 : ℝ) ))
-  | Rot.right => AffineMap.comp (AffineMap.const ℝ R2 (1/2,1/2))
-                <| AffineMap.comp (LinearMap.toAffineMap (
-                     Matrix.toLin (Basis.finTwoProd _) (Basis.finTwoProd _) !![0, 1 ; -1, 0 ] ))
-                (AffineMap.const ℝ R2 (-1/2,-1/2))
-/-
-theorem rinv_consistent : rotTransform r (rotTransform (rinv r) x) = x := by
-  sorry
-
-theorem thm_rot {rot:Rot}: rotTransform rot '' unit_sq = unit_sq := by
-  unfold rotTransform
-  /-cases' rot <;> (
-    simp
-
-  )-/
-  sorry
-
-theorem rcor_consistent {rot : Rot} {cor : Cor} : rotTransform rot '' (corTransform cor '' unit_sq) = corTransform (rcor rot cor) '' unit_sq := by sorry
--/
 
 inductive Piece : Type
   | triangle :  Piece -- triangle is bottom left half of unit_sq
@@ -118,12 +120,10 @@ theorem corTransform_homothety (i: Cor) : corTransform i = AffineMap.homothety (
       bound
     )
 
-open Set
 
-def square (c :ℝ×ℝ) (sz : NNReal) := Ioo c.1 (c.1+sz) ×ˢ Ioo c.2 (c.2+sz)
-
-def usq : Set (ℝ×ℝ)  := square ⟨0, 0⟩ 1
 -- Ioo (0:ℝ) 1 ×ˢ Ioo (0:ℝ) 1
+-- def unit_sq : Set (ℝ × ℝ) := {⟨ x , y ⟩ | 0 < x ∧ x < 1 ∧ 0 < y ∧ y < 1 }
+/-
 
 theorem unit_sq_eq_usq : unit_sq = usq := by
   ext ⟨x,y⟩
@@ -132,7 +132,7 @@ theorem unit_sq_eq_usq : unit_sq = usq := by
   unfold square
   simp_all only [mem_setOf_eq, NNReal.coe_one, zero_add, mem_prod, mem_Ioo]
   bound
-
+-/
 theorem vol_sq {c : ℝ×ℝ } {sz : NNReal} : volume (square c sz) = Real.toNNReal (sz*sz) := by
   unfold square
   unfold volume
@@ -184,21 +184,6 @@ theorem sq_cors {c  : ℝ×ℝ} {sz : NNReal} {i : Cor} : corTransform i '' (squ
     simp [h1,h2,h3]
     norm_num
     bound
-    --rw [(by simp :  2⁻¹ * a = x ↔ a = 2*x )]
-    --rw [eq_exists_right]
-    /-calc (∃ a b, ((c.1 < a ∧ a < c.1 + ↑sz) ∧ c.2 < b ∧ b < c.2 + ↑sz) ∧ (2⁻¹ * a, 2⁻¹ * b) = (x, y))
-       _ ↔ (∃ a b, ((c.1 < a ∧ a < c.1 + ↑sz) ∧ c.2 < b ∧ b < c.2 + ↑sz) ∧ (a, b) = (2*x, 2*y)) := by sorry
-       _ ↔ (2⁻¹ * c.1 < (x, y).1 ∧ (x, y).1 < 2⁻¹ * c.1 + ↑sz / 2) ∧ 2⁻¹ * c.2 < (x, y).2 ∧ (x, y).2 < 2⁻¹ * c.2 + ↑sz / 2 := by sorry
-
-    rw [exists_eq_right]
-    cases
-    simp
-    norm_num
-    bound
-    -/
-    -- simp
-    -- norm_num
-    -- bound
   ))
 
 theorem vol_quater {x: Set R2} {cor : Cor} : MeasureTheory.volume (corTransform cor '' x) = MeasureTheory.volume x /4 := by
@@ -242,10 +227,6 @@ theorem cor_disj : Pairwise (Disjoint on fun i ↦ ⇑(corTransform i) '' usq) :
             simp [corTransform]
         )
     )
-/-
-theorem test : False := by
-  #check exists_eq_right
-  sorry-/
 
 theorem square_has_4_corners : Fintype.card Cor = 4 := by
   rfl
