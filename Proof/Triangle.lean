@@ -21,10 +21,10 @@ def cor_sq : Set (ℝ × ℝ) := {⟨ x , y ⟩ | 0<x ∧ x<0.5 ∧ 0<y ∧ y<0.
 
 def triFun (s : Set (ℝ × ℝ)) : Set (ℝ × ℝ) := d0 '' s ∪ d1 '' s ∪ cor_sq
 
-
 theorem triFun_monotone : Monotone (triFun) := Monotone.sup (Monotone.sup monotone_image monotone_image) monotone_const
 def triFun_m : Set (ℝ × ℝ) →o Set (ℝ × ℝ) := ⟨ triFun , triFun_monotone⟩
 
+-- technically not a triangle (missing some lines (x,a\*2^-n) and (a\*2^-n,y))
 def triangle := lfp triFun_m
 
 /-

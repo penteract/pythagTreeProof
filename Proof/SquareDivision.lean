@@ -95,6 +95,7 @@ def triangleMap (cor:Cor) : Piece := match cor with
   | Cor.tr => Piece.emptyPiece
   | _ => Piece.triangle -/
 
+
 theorem corTransform_homothety (i: Cor) : corTransform i = AffineMap.homothety (2 * (corTransform i (0,0))) (1/2 : ℝ ) := by
   cases i <;> (
     unfold corTransform

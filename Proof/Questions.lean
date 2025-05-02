@@ -2,6 +2,81 @@ import Mathlib
 -- Why is this not computable?
 noncomputable def d0_lin : ℝ × ℝ  →ₗ[ℝ] ℝ × ℝ := Matrix.toLin (Basis.finTwoProd _) (Basis.finTwoProd _) !![1, 2 ; 3, 4 ]
 
+-- #check Module.finrank
+#check FiniteDimensional.finrank
+
+instance : Fact (FiniteDimensional.finrank ℝ (EuclideanSpace ℝ (Fin n)) = n) where
+  out := by rw [finrank_euclideanSpace, Fintype.card_fin]
+
+noncomputable section
+
+macro "R2" : term => `(ℝ × ℝ)
+
+lemma fnrnk : FiniteDimensional.finrank ℝ (EuclideanSpace ℝ (Fin n)) = n := by
+  rw [finrank_euclideanSpace, Fintype.card_fin]
+/-
+instance : Fact (FiniteDimensional.finrank ℝ (EuclideanSpace ℝ (Fin n)) = n) where
+  out := by rw [finrank_euclideanSpace, Fintype.card_fin]
+
+instance : Fact (FiniteDimensional.finrank ℝ ((Fin (↑(1+1))) → ℝ) = 2) where
+  out := by
+
+    rewrite [← (@fnrnk 2)]
+    rewrite [(@fnrnk 2)]
+    nth_rewrite 0 [(@fnrnk 2)]
+    nth_rewrite 1 [← (@fnrnk 2).out]
+    apply LinearEquiv.finrank_eq
+    symm
+    exact (EuclideanSpace.equiv (Fin 2) ℝ).toLinearEquiv
+-/
+instance : Fact (FiniteDimensional.finrank ℝ (ℝ × ℝ) = 2) where
+  out := by
+    rw [← @fnrnk 2]
+    apply LinearEquiv.finrank_eq
+    symm
+    exact LinearEquiv.trans (EuclideanSpace.equiv (Fin 2) ℝ).toLinearEquiv (LinearEquiv.finTwoArrow ℝ ℝ )
+
+
+#check (Orientation.rightAngleRotation _ : R2 ≃ₗᵢ[ℝ] R2)
+/-
+@LinearIsometryEquiv ℝ ℝ Real.semiring Real.semiring (RingHom.id ℝ) (RingHom.id ℝ) ⋯ ⋯ (ℝ × ℝ) (ℝ × ℝ)
+  NormedAddCommGroup.toSeminormedAddCommGroup NormedAddCommGroup.toSeminormedAddCommGroup NormedSpace.toModule
+  NormedSpace.toModule : Type
+@LinearIsometryEquiv ℝ ℝ Real.semiring Real.semiring (RingHom.id ℝ) (RingHom.id ℝ) ⋯ ⋯ (ℝ × ℝ) (ℝ × ℝ)
+  Prod.seminormedAddCommGroup Prod.seminormedAddCommGroup Prod.instModule Prod.instModule
+-/
+
+
+#check (@Orientation.rightAngleRotation  _ : (Fin 2 → ℝ) ≃ₗᵢ[ℝ] (Fin 2 → ℝ))
+/-
+ @LinearIsometryEquiv ℝ ℝ Real.semiring Real.semiring (RingHom.id ℝ) (RingHom.id ℝ) ⋯ ⋯ (Fin 2 → ℝ) (Fin 2 → ℝ)
+    NormedAddCommGroup.toSeminormedAddCommGroup NormedAddCommGroup.toSeminormedAddCommGroup NormedSpace.toModule
+    NormedSpace.toModule : Type
+but is expected to have type
+  @LinearIsometryEquiv ℝ ℝ Real.semiring Real.semiring (RingHom.id ℝ) (RingHom.id ℝ) ⋯ ⋯ (Fin 2 → ℝ) (Fin 2 → ℝ)
+    Pi.seminormedAddCommGroup Pi.seminormedAddCommGroup (Pi.Function.module (Fin 2) ℝ ℝ)
+    (Pi.Function.module (Fin 2) ℝ ℝ) : TypeLean 4
+    -/
+
+
+open Real
+
+def rot_neg_pi_div_4 (o : Orientation ℝ (EuclideanSpace ℝ (Fin 2)) (Fin 2)) :
+    (EuclideanSpace ℝ (Fin 2)) ≃ₗᵢ[ℝ] (EuclideanSpace ℝ (Fin 2)) :=
+  o.rotation (.coe (-(π/4)))
+
+
+lemma fnrnk : FiniteDimensional.finrank ℝ (EuclideanSpace ℝ (Fin n)) = n := by
+  rw [finrank_euclideanSpace, Fintype.card_fin]
+
+instance : Fact (FiniteDimensional.finrank ℝ ((Fin (↑(1+1))) → ℝ) = 2) where
+  out := by
+    -- rw succeeds, nth_rw fails???
+    -- rewrite [← (@fnrnk 2)]
+    nth_rewrite 0 [← (@fnrnk 2)]
+    sorry
+
+
 --def d0_lin2 : ℕ  × ℕ  →ₗ[ℕ] ℕ × ℕ := Matrix.toLin (Basis.finTwoProd _) (Basis.finTwoProd _) !![1, 2 ; 3, 4 ]
 
 -- Should I be using (ℝ × ℝ) or ((Fin 2) → ℝ )?
