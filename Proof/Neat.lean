@@ -1,5 +1,6 @@
 import Mathlib
--- import SquareDivision
+import Proof.Pieces
+-- import Proof.SquareDivision
 open Set
 open OrderHom hiding id
 
@@ -287,23 +288,6 @@ example : (Nat × Nat) = (ℕ × ℕ)  := by
 
 macro "Z2" : term => `(ℤ × ℤ)
 
-open SquareDiv
-
-inductive Piece : Type
-  | treePiece : Z2 → Rot → Piece
-  | trianglePiece : Rot → Piece -- (triangle none) is bottom left half of unit_sq
-  | emptyPiece : Piece
-  | fullPiece : Piece
-
-def pieces (s : Z2) (cor : Cor) : List (Piece) := sorry
-
-def triangleMap (cor) → List Piece :=
-
-def pieceMap (p : Piece) (cor : Cor) : List (Piece) := match piece with
-  | treePiece p r =>
-  | Triangle r => rotatep r (triangleMap rotCor
-  | emptyPiece => emptyPiece
-  | fullPiece => fullPiece
 
 --open SetCoe
 theorem piecesMakePythagTree : ∀ s : Z2, ∀ cor : Cor,

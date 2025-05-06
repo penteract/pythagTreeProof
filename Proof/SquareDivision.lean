@@ -79,15 +79,16 @@ noncomputable def corTransform (cor : Cor) : (R2 →ᵃ[ℝ] R2) := match cor wi
 
 
 
-/- theorem corners_disj : Pairwise (Disjoint on (λ c:Cor => corTransform c '' unit_sq ) ) := sorry -/
+/-
+theorem corners_disj : Pairwise (Disjoint on (λ c:Cor => corTransform c '' unit_sq ) ) := sorry
+-/
+/-
 
-
-inductive Piece : Type
+-- inductive Piece : Type
   | triangle :  Piece -- triangle is bottom left half of unit_sq
   | emptyPiece : Piece
   | fullPiece : Piece
 
-/-
 def pieces (s : Z2) (cor : Cor) : List (Piece) := sorry
 
 def triangleMap (cor:Cor) : Piece := match cor with
