@@ -25,44 +25,7 @@ noncomputable def rotLeft : R2 ≃ₗ[ℝ] R2 := by
   exact Matrix.toLinOfInv (Basis.finTwoProd _) (Basis.finTwoProd _) hmlmr hmrml
   -- exact (Matrix.toLinearEquiv (Basis.finTwoProd _) m h)
 
-
-@[simp]
-noncomputable def conj (a b : R2 ≃ᵃ[ℝ] R2) := AffineEquiv.trans (AffineEquiv.trans b.symm a) b
-@[simp]
-noncomputable def Rot.none := AffineEquiv.refl ℝ R2
-@[simp]
-noncomputable def Rot.left := conj rotLeft.toAffineEquiv (AffineIsometryEquiv.constVAdd ℝ R2 (1/2,1/2)).toAffineEquiv
-@[simp]
-noncomputable def Rot.half : (R2 ≃ᵃ[ℝ] R2) := AffineEquiv.homothetyUnitsMulHom (⟨1/2,1/2⟩ : R2) (-1)
-@[simp]
-noncomputable def Rot.right := conj rotLeft.symm.toAffineEquiv (AffineIsometryEquiv.constVAdd ℝ R2 (1/2,1/2)).toAffineEquiv
-
-open List
-
--- Tranformation (rotate about (1/2,1/2)) sending unit_sq to unitsq
-noncomputable def Rot : Finset (R2 ≃ᵃ[ℝ] R2) := Finset.mk {
-  Rot.none,
-  Rot.left,
-  Rot.half,
-  Rot.right
-  --AffineEquiv.refl ℝ R2,
-  --conj rotLeft.toAffineEquiv (AffineIsometryEquiv.constVAdd ℝ R2 (1/2,1/2)).toAffineEquiv,
-  --AffineEquiv.homothetyUnitsMulHom (⟨1/2,1/2⟩ : R2) (-1),
-  --conj rotLeft.symm.toAffineEquiv (AffineIsometryEquiv.constVAdd ℝ R2 (1/2,1/2)).toAffineEquiv
-} (by
-  unfold Multiset.Nodup
-  apply Nodup.of_map (fun f => f ⟨0,0⟩)
-  simp
-  simp [rotLeft,AffineIsometryEquiv.constVAdd, AffineIsometryEquiv.symm,Prod.ext_iff,homothety]
-  norm_num
-)
-
-def f (x : Rot) : Rot := x
-
-
-/-
-
--- inductive Rot : Type where
+inductive Rot : Type where
   | none : Rot
   | left : Rot
   | half : Rot
@@ -72,8 +35,10 @@ def rinv (r:Rot): Rot := match r with
   | Rot.left => Rot.right
   | Rot.right => Rot.left
   | _ => r
--/
 
+@[simp]
+noncomputable def conj (a b : R2 ≃ᵃ[ℝ] R2) := AffineEquiv.trans (AffineEquiv.trans b.symm a) b
+@[simp]
 noncomputable def rotTransform (rot : Rot) : (R2 ≃ᵃ[ℝ] R2) := match rot with
   | Rot.none => AffineEquiv.refl ℝ R2 --LinearMap.toAffineMap (LinearMap.id)
   | Rot.left => conj rotLeft.toAffineEquiv (AffineIsometryEquiv.constVAdd ℝ R2 (1/2,1/2)).toAffineEquiv
@@ -96,39 +61,31 @@ theorem rinv_consistent : rotTransform r (rotTransform (rinv r) x) = x := by
   simp [AffineIsometryEquiv.constVAdd,AffineIsometryEquiv.symm]
 
 
-theorem thm_rot {rot:Rot}: rot '' usq = usq := by
+theorem thm_rot {rot:Rot}: rotTransform rot '' usq = usq := by
   have h (b:ℝ ) (z:ℝ) : 2⁻¹ + (2⁻¹ + -b) = z ↔ b = 1-z := by
     norm_num
     bound
   have h' (b:ℝ ) (z:ℝ) : 2⁻¹ - b + 2⁻¹ = z ↔ b = 1-z := by
     norm_num
     bound
-  unfold Rot at rot
-  obtain ⟨r,rh⟩ := rot
+  ext ⟨x,y⟩
+  cases' rot
+  unfold usq square
   simp
-  rcases rh with ⟨⟩ | ⟨_,rh⟩
-  simp
-  rcases rh with ⟨⟩ | ⟨_,rh⟩
-  ext ⟨x,y⟩
-  unfold usq square
-  simp [AffineIsometryEquiv.constVAdd,AffineIsometryEquiv.symm,rotLeft]
-  simp [← and_assoc,h]
-  bound
-  rcases rh with ⟨⟩ | ⟨_,rh⟩
-  ext ⟨x,y⟩
-  unfold usq square
-  simp [homothety]
-  simp [← and_assoc,h']
-  bound
-  rcases rh with ⟨⟩ | ⟨_,rh⟩
-  ext ⟨x,y⟩
-  unfold usq square
-  simp [AffineIsometryEquiv.constVAdd,AffineIsometryEquiv.symm,rotLeft]
-  simp [← and_assoc,h]
-  bound
-  contradiction
+  . unfold usq square
+    simp [rotLeft,AffineIsometryEquiv.constVAdd]
+    simp [← and_assoc,h]
+    bound
+  . unfold usq square
+    simp [AffineIsometryEquiv.constVAdd,homothety]
+    simp [← and_assoc,h']
+    bound
+  . unfold usq square
+    simp [rotLeft,AffineIsometryEquiv.constVAdd]
+    simp [← and_assoc,h]
+    bound
 
-def rotCor (r : Rot) (c : Cor) : Cor := match rot with
+def rotCor (r : Rot) (c : Cor) : Cor := match r with
   | Rot.none => c
   | Rot.left => match c with
     | Cor.bl => Cor.br
