@@ -9,19 +9,19 @@ inductive Piece : Type
   | trianglePiece : Rot → Piece -- (triangle none) is bottom left half of unit_sq
   | emptyPiece : Piece
   | fullPiece : Piece
-
+open Piece
 def pieces (s : Z2) (cor : Cor) : List (Piece) := sorry
 
 def triangleMap (cor : Cor) : List Piece := sorry
 
 def rotatep (r : Rot) (p:Piece) : Piece := match piece with
-  | Piece.treePiece xn yn r => treePiece xn yn (rotCor r)
-  | Piece.trianglePiece r => trianglePiece (rotCor r)
-  | Piece.emptyPiece => emptyPiece
-  | Piece.fullPiece => fullPiece
+  | treePiece xn yn r => treePiece xn yn (rotCor r)
+  | trianglePiece r => trianglePiece (rotCor r)
+  | emptyPiece => emptyPiece
+  | fullPiece => fullPiece
 
 def pieceMap (p : Piece) (cor : Cor) : List (Piece) := match piece with
-  | treePiece xn yn r =>
+  | treePiece xn yn r => sorry
   | trianglePiece r => rotatep r (triangleMap rotCor)
   | emptyPiece => emptyPiece
   | fullPiece => fullPiece
