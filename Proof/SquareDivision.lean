@@ -105,11 +105,12 @@ theorem corTransform_homothety (i: Cor) : corTransform i = AffineMap.homothety (
     simp_all only [vsub_eq_sub, vadd_eq_add]
   )
   . ext p : 2 <;>(
-      simp_all only [LinearMap.coe_toAffineMap, LinearMap.smul_apply, LinearMap.id_coe, id_eq, smul_snd, smul_eq_mul,
-        coe_add, coe_smul, coe_sub, coe_id, coe_const, Function.const_zero, sub_zero, Pi.add_apply, Pi.smul_apply,
-        Pi.zero_apply, add_zero]
-      sorry
-  )
+      simp_all only [LinearMap.coe_toAffineMap, LinearMap.smul_apply, LinearMap.id_coe, id_eq,
+        smul_fst, smul_snd, smul_eq_mul,
+        coe_add, coe_smul, coe_sub, coe_id, coe_const, Pi.add_apply, Pi.smul_apply, Pi.sub_apply,
+        Function.const_apply,
+        fst_add, fst_sub, fst_mul, snd_add,snd_sub, snd_mul, fst_ofNat, mul_zero, sub_zero, add_zero]
+    )
   . ext p : 2 <;>
       simp
     norm_num
@@ -170,7 +171,7 @@ theorem sq_disj_y {c1 c2 : ℝ×ℝ} {sz1 sz2 : NNReal} (le : c1.2 + sz1 ≤ c2.
   rw [I_disj le,prod_empty]
 
 set_option maxHeartbeats 300000
-theorem sq_cors {c  : ℝ×ℝ} {sz : NNReal} {i : Cor} : corTransform i '' (square c sz) = (square (corTransform i c) (sz /2)) := by
+theorem sq_cors {c : ℝ×ℝ} {sz : NNReal} {i : Cor} : corTransform i '' (square c sz) = (square (corTransform i c) (sz /2)) := by
   obtain ⟨c1,c2⟩  := c
   unfold corTransform
   unfold square

@@ -25,17 +25,28 @@ noncomputable def rotLeft : R2 ≃ₗ[ℝ] R2 := by
   exact Matrix.toLinOfInv (Basis.finTwoProd _) (Basis.finTwoProd _) hmlmr hmrml
   -- exact (Matrix.toLinearEquiv (Basis.finTwoProd _) m h)
 
+
+macro "Rot" : term => `(ZMod 4)
+-- def Rot := ZMod 4
+/- Could define it like this, but proving that it's a group is a waste of time
 inductive Rot : Type where
   | none : Rot
   | left : Rot
   | half : Rot
   | right : Rot
+  deriving DecidableEq
+-/
+def Rot.none : Rot := 0
+def Rot.left : Rot := 1
+def Rot.half : Rot := 2
+def Rot.right : Rot := 3
 
-def rinv (r:Rot): Rot := match r with
+-- def rinv (r:Rot): Rot := -r
+/- match r with
   | Rot.left => Rot.right
   | Rot.right => Rot.left
   | _ => r
-
+-/
 
 -- @[simp]
 -- noncomputable def conj (a b : R2 ≃ᵃ[ℝ] R2) := AffineEquiv.trans (AffineEquiv.trans b.symm a) b
@@ -55,25 +66,25 @@ theorem conj_trans [Ring k] [AddCommGroup V₁] [AddCommGroup V₂] [Module k V�
 
 @[simp]
 noncomputable def rotTransform (rot : Rot) : (R2 ≃ᵃ[ℝ] R2) := match rot with
-  | Rot.none => AffineEquiv.refl ℝ R2 --LinearMap.toAffineMap (LinearMap.id)
-  | Rot.left => conj rotLeft.toAffineEquiv (AffineIsometryEquiv.constVAdd ℝ R2 (1/2,1/2)).toAffineEquiv
-  | Rot.half => AffineEquiv.homothetyUnitsMulHom ⟨1/2,1/2⟩ (-1)
-  | Rot.right => conj rotLeft.symm.toAffineEquiv (AffineIsometryEquiv.constVAdd ℝ R2 (1/2,1/2)).toAffineEquiv
+  | 0 => AffineEquiv.refl ℝ R2 --LinearMap.toAffineMap (LinearMap.id)
+  | 1 => conj rotLeft.toAffineEquiv (AffineIsometryEquiv.constVAdd ℝ R2 (1/2,1/2)).toAffineEquiv
+  | 2 => AffineEquiv.homothetyUnitsMulHom ⟨1/2,1/2⟩ (-1)
+  | 3 => conj rotLeft.symm.toAffineEquiv (AffineIsometryEquiv.constVAdd ℝ R2 (1/2,1/2)).toAffineEquiv
 
 
 
-theorem rinv_consistent : rotTransform r (rotTransform (rinv r) x) = x := by
-  obtain ⟨x,y⟩ := x
-  cases' r <;>(
-    unfold rotTransform rinv
-    simp
-    )
-  . unfold rotLeft
-    simp [AffineIsometryEquiv.constVAdd, AffineIsometryEquiv.symm]
-  . unfold homothety
-    simp
-  unfold rotLeft
-  simp [AffineIsometryEquiv.constVAdd,AffineIsometryEquiv.symm]
+-- theorem rinv_consistent : rotTransform r (rotTransform (rinv r) x) = x := by
+--   obtain ⟨x,y⟩ := x
+--   cases' r <;>(
+--     unfold rotTransform rinv
+--     simp
+--     )
+--   . unfold rotLeft
+--     simp [AffineIsometryEquiv.constVAdd, AffineIsometryEquiv.symm]
+--   . unfold homothety
+--     simp
+--   unfold rotLeft
+--   simp [AffineIsometryEquiv.constVAdd,AffineIsometryEquiv.symm]
 
 
 theorem thm_rot {rot:Rot}: rotTransform rot '' usq = usq := by
@@ -84,7 +95,7 @@ theorem thm_rot {rot:Rot}: rotTransform rot '' usq = usq := by
     norm_num
     bound
   ext ⟨x,y⟩
-  cases' rot
+  fin_cases rot
   unfold usq square
   simp
   . unfold usq square
@@ -99,6 +110,7 @@ theorem thm_rot {rot:Rot}: rotTransform rot '' usq = usq := by
     simp [rotLeft,AffineIsometryEquiv.constVAdd]
     simp [← and_assoc,h]
     bound
+/-
 @[simp]
 def lefts : Rot ≃ Fin 4 where
   toFun := fun r => match r with
@@ -123,7 +135,7 @@ def fromLefts (n : Fin 4) : Rot := match n with
   | 1 => Rot.none
   | 2 => Rot.none
   | 3 => Rot.none
-
+-/
 -- lemma coe_toAffineEquiv_symm {k : Type u_1} {V₁ : Type u_6} {V₂ : Type u_7} [Ring k] [AddCommGroup V₁]
 --          [AddCommGroup V₂] [Module k V₁] [Module k V₂]
 --     (e : V₁ ≃ₗ[k] V₂)
@@ -131,29 +143,43 @@ def fromLefts (n : Fin 4) : Rot := match n with
 --   rfl
 theorem rotIsRotation (r : Rot):
   rotTransform r =
-    conj (conj (rotation (Circle.exp (π * ((lefts r : ℕ) : ℝ ) / 2))).toAffineEquiv Complex.equivRealProdLm.toAffineEquiv) (AffineIsometryEquiv.constVAdd ℝ R2 (1/2,1/2)).toAffineEquiv := by
-  have h : π * ↑(↑(3:Fin 4):ℕ) / 2 = -(π / 2) + 2*π := by
-    rw [(by rfl : (↑(3:Fin 4):ℕ) = (3 : ℕ))]
+    conj (conj (rotation (Circle.exp (π * (r.val : ℝ ) / 2))).toAffineEquiv Complex.equivRealProdLm.toAffineEquiv) (AffineIsometryEquiv.constVAdd ℝ R2 (1/2,1/2)).toAffineEquiv := by
+  have h : π * 3 / 2 = -(π / 2) + 2*π := by
     rw [mul_div_assoc]
     ring
-  cases r
+  fin_cases r <;> simp only
   ext ⟨x,y⟩
-  simp_all only [Fin.isValue, rotTransform, AffineEquiv.refl_apply, conj, one_div,
-    AffineIsometryEquiv.toAffineEquiv_symm, lefts, Equiv.coe_fn_mk, Fin.val_zero, CharP.cast_eq_zero, mul_zero,
+  -- aesop_unfold
+  simp_all only [rotTransform, AffineEquiv.refl_apply, conj, one_div,
+    AffineIsometryEquiv.toAffineEquiv_symm, Nat.reduceAdd, Fin.zero_eta, ZMod.val_zero, CharP.cast_eq_zero, mul_zero,
+    zero_div, Circle.exp_zero, map_one, AffineEquiv.trans_apply, AffineIsometryEquiv.coe_toAffineEquiv,
+    LinearEquiv.coe_toAffineEquiv, LinearIsometryEquiv.coe_toLinearEquiv, LinearIsometryEquiv.coe_one, id_eq,
+    AffineEquiv.apply_symm_apply, AffineIsometryEquiv.apply_symm_apply]
+  simp_all only [ rotTransform, AffineEquiv.refl_apply, conj, one_div,
+    AffineIsometryEquiv.toAffineEquiv_symm, Nat.reduceAdd, Fin.zero_eta, ZMod.val_zero, CharP.cast_eq_zero, mul_zero,
+    zero_div, Circle.exp_zero, map_one, AffineEquiv.trans_apply, AffineIsometryEquiv.coe_toAffineEquiv,
+    LinearEquiv.coe_toAffineEquiv, LinearIsometryEquiv.coe_toLinearEquiv, LinearIsometryEquiv.coe_one, id_eq,
+    AffineEquiv.apply_symm_apply, AffineIsometryEquiv.apply_symm_apply]
+  /-simp_all only [Fin.isValue, rotTransform, AffineEquiv.refl_apply, conj, one_div,
+    AffineIsometryEquiv.toAffineEquiv_symm, Fin.val_zero, CharP.cast_eq_zero, mul_zero,
     zero_div, Circle.exp_zero, _root_.map_one, AffineEquiv.trans_apply, AffineIsometryEquiv.coe_toAffineEquiv,
     LinearEquiv.coe_toAffineEquiv, LinearIsometryEquiv.coe_toLinearEquiv, LinearIsometryEquiv.coe_one, id_eq,
     AffineEquiv.apply_symm_apply, AffineIsometryEquiv.apply_symm_apply]
-  simp
+  -/
+  --simp only
   ext ⟨x,y⟩ <;> (
+    simp only [ZMod.val]
     simp [rotLeft,AffineIsometryEquiv.constVAdd]
     simp [LinearEquiv.toAffineEquiv, AffineEquiv.symm]
   )
   ext ⟨ x,y⟩ <;>(
+    simp only [ZMod.val]
     simp [rotLeft,AffineIsometryEquiv.constVAdd,homothety]
     simp [LinearEquiv.toAffineEquiv, AffineEquiv.symm]
     ring
   )
   ext ⟨x,y⟩ <;> (
+    simp only [ZMod.val]
     simp [rotLeft,AffineIsometryEquiv.constVAdd]
     simp [←Complex.ofReal_natCast,←Complex.ofReal_ofNat, ←Complex.ofReal_mul, ←Complex.ofReal_div]
     simp [LinearEquiv.toAffineEquiv, AffineEquiv.symm]
@@ -163,24 +189,24 @@ theorem rotIsRotation (r : Rot):
 
 
 def rotCor (r : Rot) (c : Cor) : Cor := match r with
-  | Rot.none => c
-  | Rot.left => match c with
+  | 0 => c
+  | 1 => match c with
     | Cor.bl => Cor.br
     | Cor.br => Cor.tr
     | Cor.tr => Cor.tl
     | Cor.tl => Cor.bl
-  | Rot.half => match c with
+  | 2 => match c with
     | Cor.bl => Cor.tr
     | Cor.br => Cor.tl
     | Cor.tr => Cor.bl
     | Cor.tl => Cor.br
-  | Rot.right => match c with
+  | 3 => match c with
     | Cor.bl => Cor.tl
     | Cor.br => Cor.bl
     | Cor.tr => Cor.br
     | Cor.tl => Cor.tr
 
-def rotRot (r:Rot) (r':Rot) : Rot := lefts.symm (lefts r + lefts r')
+-- def rotRot (r:Rot) (r':Rot) : Rot := lefts.symm (lefts r + lefts r')
 
 
 /-
@@ -231,14 +257,13 @@ lemma ll {A B} {a b : A} (f : A→ B) : a = b → f a = f b := by
 
 -- lemma aff_e (a b : P₁ ≃ᵃ[k] P₂): a=b ↔ (a:P_\) = b
 
-theorem rotRot_consistent (r:Rot) (r':Rot) : rotTransform (rotRot r r') = AffineEquiv.trans (rotTransform r)  (rotTransform r') := by
+theorem rotTransform_hom (r:Rot) (r':Rot) : rotTransform (r + r') = AffineEquiv.trans (rotTransform r)  (rotTransform r') := by
   rw [rotIsRotation]
   rw [rotIsRotation]
   rw [rotIsRotation]
   rw [conj_trans]
   rw [conj_trans]
-  unfold rotRot
-  rw [Equiv.rightInverse_symm]
+  simp only [ZMod.val]
   rw [cexp]
   apply ll (fun x => conj x _)
   apply ll (fun x => conj x Complex.equivRealProdLm.toAffineEquiv)
@@ -250,6 +275,12 @@ theorem rotRot_consistent (r:Rot) (r':Rot) : rotTransform (rotRot r r') = Affine
   nth_rw 2 [mul_comm]
   rw [Submonoid.coe_mul,mul_assoc]
 
+theorem rotCor_hom (r:Rot) (r':Rot) : rotCor (r + r') = rotCor r ∘ rotCor r' := by
+  ext c
+  fin_cases r <;>  fin_cases r' <;> cases c <;> decide
+
+/-theorem rotRot_assoc (r1 r2 r3) : rotRot r1 (rotRot r2 r3) = rotRot (rotRot r1 r2) r3 := by
+  cases r1 <;> cases r2 <;> cases r3 <;> simp [rotRot]-/
 
 /-
 theorem rcor_consistent {rot : Rot} {cor : Cor} :
