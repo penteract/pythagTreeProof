@@ -77,7 +77,7 @@ theorem rinv_consistent : rotTransform r (rotTransform (rinv r) x) = x := by
 
 
 theorem thm_rot {rot:Rot}: rotTransform rot '' usq = usq := by
-  have h (b:ℝ ) (z:ℝ) : 2⁻¹ + (2⁻¹ + -b) = z ↔ b = 1-z := by
+  have h (b:ℝ ) (z:ℝ) : 2⁻¹ + (-b + 2⁻¹) = z ↔ b = 1-z := by
     norm_num
     bound
   have h' (b:ℝ ) (z:ℝ) : 2⁻¹ - b + 2⁻¹ = z ↔ b = 1-z := by
@@ -123,6 +123,12 @@ def fromLefts (n : Fin 4) : Rot := match n with
   | 1 => Rot.none
   | 2 => Rot.none
   | 3 => Rot.none
+
+-- lemma coe_toAffineEquiv_symm {k : Type u_1} {V₁ : Type u_6} {V₂ : Type u_7} [Ring k] [AddCommGroup V₁]
+--          [AddCommGroup V₂] [Module k V₁] [Module k V₂]
+--     (e : V₁ ≃ₗ[k] V₂)
+--      : (e.toAffineEquiv).symm = (e.symm : V₂ → V₁) :=
+--   rfl
 theorem rotIsRotation (r : Rot):
   rotTransform r =
     conj (conj (rotation (Circle.exp (π * ((lefts r : ℕ) : ℝ ) / 2))).toAffineEquiv Complex.equivRealProdLm.toAffineEquiv) (AffineIsometryEquiv.constVAdd ℝ R2 (1/2,1/2)).toAffineEquiv := by
@@ -140,7 +146,6 @@ theorem rotIsRotation (r : Rot):
   simp
   ext ⟨x,y⟩ <;> (
     simp [rotLeft,AffineIsometryEquiv.constVAdd]
-    simp [← Complex.ofReal_ofNat, ← Complex.ofReal_div]
     simp [LinearEquiv.toAffineEquiv, AffineEquiv.symm]
   )
   ext ⟨ x,y⟩ <;>(
@@ -178,16 +183,53 @@ def rotCor (r : Rot) (c : Cor) : Cor := match r with
 def rotRot (r:Rot) (r':Rot) : Rot := lefts.symm (lefts r + lefts r')
 
 
-theorem cexp (a b:ℝ ) : (Circle.exp (π * ((a + b) %4) / 2 )) = Circle.exp (π * a / 2 ) *Circle.exp (π * b / 2 ) := by
+/-
+lemma lll : (5 : ℝ)  % (2.1 :ℝ ) = (0:ℝ ) := by
+  sorry
+
+
+lemma l (a b : ℝ ) : a * 2⁻¹ + b * 2⁻¹ ≡ (a + b) % 4 * 2⁻¹ [PMOD 2] := by
+  rw [← right_distrib]
+  simp_all only [ne_eq, inv_eq_zero, OfNat.ofNat_ne_zero, not_false_eq_true,
+  AddCommGroup.mul_modEq_mul_right,
+    div_inv_eq_mul]
+  simp [AddComGroup.ModEq]
+  sorry
+-/
+lemma l (n : Nat) (a b : Fin n): a + b ≡ (a + b : Fin n) [ZMOD n] := by
+  rw [Lean.Omega.Fin.ofNat_val_add]
+  rw [Int.ModEq.eq_1]
+  symm
+  exact Int.emod_emod_of_dvd _ (dvd_refl _)
+
+theorem cexp (a b:Fin 4 ) : (Circle.exp (π * ((a + b : Fin 4)) / 2 )) = Circle.exp (π * a / 2 ) *Circle.exp (π * b / 2 ) := by
   symm
   calc Circle.exp (π * a / 2 ) *Circle.exp (π * b / 2 )
-    = Circle.exp (π * a / 2  + π * b / 2 ) := Eq.symm (Circle.exp_add _ _)
-    _ = (Circle.exp (π * ((a + b) %4) / 2 )) := by
-      rw [div_add_div_same,← left_distrib]
-      -- #check Circle.instContinuousSMul
-      -- apply Circle.exp_inj
-      rw [Circle.exp_eq_exp]
-      sorry
+    _ = Circle.exp (π * a / 2  + π * b / 2 ) := Eq.symm (Circle.exp_add (π * a / 2) (π * b / 2))
+    _ = Circle.exp (π * (a+b) / 2  ) := by rw [div_add_div_same,← left_distrib]
+    _ = (Circle.exp (π * ((a + b) : Fin 4 ) / 2 )) := by
+      apply Circle.exp_inj.mpr
+
+      have h:=Real.pi_ne_zero
+      simp_all
+      have h' : 2 * π * 2 / π = 4 := by
+        ring_nf
+        simp_all
+      rw [h']
+      have h'' : (4:ℝ) = (4:ℕ) := by simp
+      rw [h'',← Lean.Grind.CommRing.natCast_add]
+      apply AddCommGroup.ModEq.natCast
+      rw [Fin.val_add, Nat.ModEq.eq_1]
+      symm
+      exact (Nat.mod_mod_of_dvd _ (dvd_refl 4))
+
+
+lemma ll {A B} {a b : A} (f : A→ B) : a = b → f a = f b := by
+  intro a_1
+  subst a_1
+  simp_all only
+
+-- lemma aff_e (a b : P₁ ≃ᵃ[k] P₂): a=b ↔ (a:P_\) = b
 
 theorem rotRot_consistent (r:Rot) (r':Rot) : rotTransform (rotRot r r') = AffineEquiv.trans (rotTransform r)  (rotTransform r') := by
   rw [rotIsRotation]
@@ -197,8 +239,16 @@ theorem rotRot_consistent (r:Rot) (r':Rot) : rotTransform (rotRot r r') = Affine
   rw [conj_trans]
   unfold rotRot
   rw [Equiv.rightInverse_symm]
-
-
+  rw [cexp]
+  apply ll (fun x => conj x _)
+  apply ll (fun x => conj x Complex.equivRealProdLm.toAffineEquiv)
+  apply AffineEquiv.coeFn_inj.mp
+  rw [AffineEquiv.coe_trans]
+  simp only [LinearEquiv.coe_toAffineEquiv,LinearIsometryEquiv.coe_toLinearEquiv]
+  ext p
+  simp only [Function.comp,rotation_apply]
+  nth_rw 2 [mul_comm]
+  rw [Submonoid.coe_mul,mul_assoc]
 
 
 /-

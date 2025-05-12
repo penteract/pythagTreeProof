@@ -104,10 +104,12 @@ theorem corTransform_homothety (i: Cor) : corTransform i = AffineMap.homothety (
     unfold AffineMap.homothety
     simp_all only [vsub_eq_sub, vadd_eq_add]
   )
-  . ext p : 2 <;>
+  . ext p : 2 <;>(
       simp_all only [LinearMap.coe_toAffineMap, LinearMap.smul_apply, LinearMap.id_coe, id_eq, smul_snd, smul_eq_mul,
         coe_add, coe_smul, coe_sub, coe_id, coe_const, Function.const_zero, sub_zero, Pi.add_apply, Pi.smul_apply,
         Pi.zero_apply, add_zero]
+      sorry
+  )
   . ext p : 2 <;>
       simp
     norm_num
@@ -173,7 +175,7 @@ theorem sq_cors {c  : ℝ×ℝ} {sz : NNReal} {i : Cor} : corTransform i '' (squ
   unfold corTransform
   unfold square
   unfold image
-  checkpoint (cases i <;> (
+  cases i <;> (
     simp
     --ext p
     ext ⟨ x,y⟩
@@ -186,7 +188,7 @@ theorem sq_cors {c  : ℝ×ℝ} {sz : NNReal} {i : Cor} : corTransform i '' (squ
     simp [h1,h2,h3]
     norm_num
     bound
-  ))
+  )
 
 theorem vol_quater {x: Set R2} {cor : Cor} : MeasureTheory.volume (corTransform cor '' x) = MeasureTheory.volume x /4 := by
   rw [corTransform_homothety]
@@ -201,7 +203,7 @@ theorem vol_quater {x: Set R2} {cor : Cor} : MeasureTheory.volume (corTransform 
   simp
   simp
 
-theorem cor_disj : Pairwise (Disjoint on fun i ↦ ⇑(corTransform i) '' usq) := by
+theorem cor_disj : Pairwise (Function.onFun Disjoint (fun i ↦ ⇑(corTransform i) '' usq)) := by
   intro i j
   intro h
   --apply Set.disjoint_iff_inter_eq_empty.mpr

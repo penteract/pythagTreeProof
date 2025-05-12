@@ -67,7 +67,7 @@ theorem volume_sum_pieces (f : ι → Set α)
   -- (S is a rep-tile)
   {ssubs : ⋃ i, t i S ⊆ S}
   {smakes : volume S = ∑' i, volume (t i S)} -- alternatively, S =ᵐ[volume] ⋃ i, t i S
-  {ts_disj : Pairwise (Disjoint on (λ i => t i S))}
+  {ts_disj : Pairwise (Function.onFun Disjoint (λ i => t i S))}
   {measurable_tis : ∀ i, (MeasurableSet (t i S))}
   {measurable_tifi : ∀ i, (MeasurableSet (t i (f i)))} -- The theorem is true without this assumption
                                                        -- (certainly when ι is finite) but I think that

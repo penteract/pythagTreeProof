@@ -2,17 +2,20 @@ import Mathlib
 -- Why is this not computable?
 noncomputable def d0_lin : ℝ × ℝ  →ₗ[ℝ] ℝ × ℝ := Matrix.toLin (Basis.finTwoProd _) (Basis.finTwoProd _) !![1, 2 ; 3, 4 ]
 
--- #check Module.finrank
-#check FiniteDimensional.finrank
 
-instance : Fact (FiniteDimensional.finrank ℝ (EuclideanSpace ℝ (Fin n)) = n) where
+-- Why is % defined uselessly on ℝ?
+
+-- #check Module.finrank
+#check Module.finrank
+
+instance : Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin n)) = n) where
   out := by rw [finrank_euclideanSpace, Fintype.card_fin]
 
 noncomputable section
 
 macro "R2" : term => `(ℝ × ℝ)
 
-lemma fnrnk : FiniteDimensional.finrank ℝ (EuclideanSpace ℝ (Fin n)) = n := by
+lemma fnrnk : Module.finrank ℝ (EuclideanSpace ℝ (Fin n)) = n := by
   rw [finrank_euclideanSpace, Fintype.card_fin]
 /-
 instance : Fact (FiniteDimensional.finrank ℝ (EuclideanSpace ℝ (Fin n)) = n) where
@@ -29,7 +32,7 @@ instance : Fact (FiniteDimensional.finrank ℝ ((Fin (↑(1+1))) → ℝ) = 2) w
     symm
     exact (EuclideanSpace.equiv (Fin 2) ℝ).toLinearEquiv
 -/
-instance : Fact (FiniteDimensional.finrank ℝ (ℝ × ℝ) = 2) where
+instance : Fact (Module.finrank ℝ (ℝ × ℝ) = 2) where
   out := by
     rw [← @fnrnk 2]
     apply LinearEquiv.finrank_eq
@@ -66,14 +69,14 @@ def rot_neg_pi_div_4 (o : Orientation ℝ (EuclideanSpace ℝ (Fin 2)) (Fin 2)) 
   o.rotation (.coe (-(π/4)))
 
 
-lemma fnrnk : FiniteDimensional.finrank ℝ (EuclideanSpace ℝ (Fin n)) = n := by
+lemma fnrnk' : Module.finrank ℝ (EuclideanSpace ℝ (Fin n)) = n := by
   rw [finrank_euclideanSpace, Fintype.card_fin]
 
-instance : Fact (FiniteDimensional.finrank ℝ ((Fin (↑(1+1))) → ℝ) = 2) where
+instance : Fact (Module.finrank ℝ ((Fin (↑(1+1))) → ℝ) = 2) where
   out := by
     -- rw succeeds, nth_rw fails???
-    -- rewrite [← (@fnrnk 2)]
-    nth_rewrite 0 [← (@fnrnk 2)]
+    --rewrite [← (@fnrnk 2)]
+    nth_rewrite 0 [← (@fnrnk' 2)]
     sorry
 
 
@@ -149,7 +152,7 @@ open Real
 open AffineMap
 open Matrix
 open Prod
-macro "R2" : term => `(ℝ × ℝ)
+-- macro "R2" : term => `(ℝ × ℝ)
 -- Tranformation (scale and translate) sending unit_sq to a corner of unitsq
 noncomputable def corTransform (cor : Cor) : (R2 →ᵃ[ℝ] R2) := match cor with
   | Cor.bl => LinearMap.toAffineMap ((1/2 : ℝ ) • LinearMap.id)
@@ -183,3 +186,12 @@ lemma cor : cor_sq = corTransform Cor.bl '' unit_sq := by
 noncomputable def notunivchoice (nottop : A≠Set.univ) : α := by
   --exact Classical.choice (Set.nonempty_compl.mpr nottop)
   exact Set.Nonempty.some (Set.nonempty_compl.mpr nottop)
+
+
+
+
+lemma l (n : Nat) (a b : Fin n): a + b ≡ (a + b : Fin n) [ZMOD n] := by
+  rw [Lean.Omega.Fin.ofNat_val_add]
+  rw [Int.ModEq.eq_1]
+  symm
+  exact Int.emod_emod_of_dvd _ (dvd_refl _)
