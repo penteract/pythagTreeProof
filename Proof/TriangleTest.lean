@@ -150,7 +150,7 @@ lemma obv2 (a:ENNReal ): a/4*2 = a/2 := by
   split
   contradiction
   rw [top_div]
-  simp_all only [two_ne_top, ↓reduceIte]
+  simp_all only [ofNat_ne_top, ↓reduceIte]
   have h4 : (4 :ENNReal) = ↑(4 : NNReal) := (coe_ofNat 4)
   have h2 : (2 :ENNReal) = ↑(2 : NNReal) := (coe_ofNat 2 )
   rw [h4, h2 , ←ENNReal.coe_div , ←ENNReal.coe_div , ←ENNReal.coe_mul]
@@ -320,17 +320,13 @@ lemma tri_area_lem : MeasureTheory.volume triangle = MeasureTheory.volume triang
     simp [vol_sq]
     norm_num
     symm
-    rw [← toNNReal_eq_one_iff]
-    rw [← NNReal.tsum_eq_toNNReal_tsum]
-
-    rw [← NNReal.coe_inj,NNReal.coe_one,NNReal.coe_tsum]
-    rw [Real.coe_toNNReal]
-    rw [tsum_const (1/4)]
-    simp
     rw [square_has_4_corners]
+    rw [← toNNReal_eq_one_iff]
+    rw [Nat.cast_ofNat, ENNReal.toNNReal_mul, ENNReal.toNNReal_coe]
+    rw [ENNReal.toNNReal_ofNat]
+    rw [Real.toNNReal_div]
     simp
     simp
-
   . exact cor_disj
   . exact measurable_sq_corners
   . intro i
