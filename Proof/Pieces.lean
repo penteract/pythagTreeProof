@@ -11,7 +11,7 @@ inductive Piece : Type
   | fullPiece : Piece
   deriving DecidableEq
 open Piece
-def pieces (s : Z2) (cor : Cor) : List (Piece) := sorry
+-- def pieces (s : Z2) (cor : Cor) : List (Piece) := sorry
 
 def triangleMap (cor : Cor) : Piece := match cor with
   | .bl => fullPiece
@@ -33,8 +33,33 @@ theorem rotatep_hom(r : Rot) (r' : Rot) : rotatep (r + r') = rotatep r ∘ (rota
   simp only [rotatep]
   simp only [rotatep]
 
+
+-- TODO: carefully consider centering squares on integer coordinates
+-- doubled position of bottom left of corner
+def corPos (xn : Fin 7) (yn : Fin 4) (cor : Cor) : ℤ × ℤ  := match cor with
+    | .bl => (2*xn-6,2*yn)
+    | .tl => (2*xn-6,2*yn+1)
+    | .tr => (2*xn-5,2*yn+1)
+    | .br => (2*xn-5,2*yn)
 -- Finset or list?
-def treeMap (xn : Fin 7) (yn : Fin 4) (cor : Cor) : List Piece := sorry
+def treeMap (xn : Fin 7) (yn : Fin 4) (cor : Cor) : List Piece :=
+  let ⟨px,py⟩  := (corPos xn yn cor)
+  if xn==3 && yn==0 then [fullPiece] else
+  if yn==1 && px>-2 && px < 3 then (match cor with
+    | .bl => [trianglePiece Rot.left]
+    | .tl => [trianglePiece Rot.none]
+    | .tr => [trianglePiece Rot.right]
+    | .br => [trianglePiece Rot.half]
+  ) else List.flatMap (fun ⟨(tp : ℤ ×ℤ) ,r⟩ => let⟨x,y⟩ := tp + (3,0)
+     if 0 ≤ x && x < 7  && 0≤ y && y<4
+        then [treePiece (Fin.ofNat' 7 (Int.toNat x)) (Fin.ofNat' 4 (Int.toNat y)) r]
+        else []
+    )
+  [((py-3,-1-px),Rot.left),
+  ((px-2,py-4), Rot.none),((px+1,py-4), Rot.none),
+  ((4-py,px-3),Rot.right)
+  ]
+-- In theory, I would like to have the same function transforming coordinates here as for transforming reals
 
 def pieceMap (p : Piece) (cor : Cor) : List (Piece) := match p with
   | treePiece xn yn r => List.map (rotatep r) (treeMap xn yn (rotCor (- r) cor))
@@ -61,40 +86,3 @@ theorem pieceMap_rot_comm (p : Piece) (r : Rot) (cor:Cor) :
 
 def multiPieceMap (ps : List Piece) (cor : Cor) : List Piece :=
   List.eraseDups (List.flatMap (fun p => pieceMap p cor) ps)
-
-
--- def Piece : Type := sorry
-
-def pythagTree : Set (ℝ × ℝ) := sorry
-
-def grid := Fin 7 × Fin 4
-
-def sqr (c : grid): Set R2 := square ⟨c.1,c.2⟩  1
-
-
--- def tile p := pythagTree ∩ (sqr p)
-def gridPiece (c:grid) : Piece := sorry
-
-
-def getCors (p: Piece) (c: Cor) : Set Piece :=
-  sorry
-
-
-def getTile (p :Piece) : Set R2 := sorry
-
-def getTileIsInter (c : grid):
-  getTile (gridPiece c) =
-  AffineEquiv.constVAdd ℝ (ℝ×ℝ) ⟨3-c.1, -c.2⟩ '' (pythagTree ∩ (sqr c)) := by
-  sorry
-
-theorem getTileIsInter' (c : grid): getTile (gridPiece c) = pythagTree ∩ (sqr c) := by
-  have x:pythagTree := by
-    sorry
-  obtain ⟨ ⟨a,b⟩,h⟩ := x
-  sorry
-
--- def pieceMap (p : Piece) (cor : Cor) : List (Piece) := sorry
-
-theorem pieceMap_makes_piece (p : Piece) (cor : Cor):
-  getTile p ∩ (corTransform cor '' usq) = (corTransform cor '' Multiset.sup (List.map getTile (pieceMap p cor))) := by
-  sorry
