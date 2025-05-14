@@ -195,3 +195,26 @@ lemma l (n : Nat) (a b : Fin n): a + b ≡ (a + b : Fin n) [ZMOD n] := by
   rw [Int.ModEq.eq_1]
   symm
   exact Int.emod_emod_of_dvd _ (dvd_refl _)
+
+def tstl1 : List (ℤ ) :=
+  let (z,x)  := ((3:ℤ), (3 : ℤ) )
+  List.flatMap
+   (fun ⟨ tp,r⟩ => let ⟨x,y⟩  := tp + (3,0) -- ( tp + (3:ℤ),tp)
+    [cond r x y].concat (if r then 9 else 8))
+    [((z+1,x+1),true)]
+def tstl2 : List (ℤ ) :=
+  let (z,x)  := ((3:ℤ), (3 : ℤ) )
+  List.flatMap
+   (fun ⟨ tp,r⟩ => let ⟨x,y⟩  := tp + (3,0) -- ( tp + (3:ℤ),tp)
+    if r then [cond r x y] else [cond r x y])
+    [((z+1,x+1),true)]
+
+def tstl3 (z : ℤ ) : List (ℤ ×ℤ ) :=
+  let (z,x)  := ((3:ℤ), (3 : ℤ) )
+  List.flatMap
+   (fun ⟨ tp,r⟩ => let ⟨x,y⟩  := tp + (3,0)
+    cond r [tp + (3,0)] [])
+    [((z+1,x+1),true)]
+
+def triangle : Set (ℝ×ℝ) := {⟨x,y⟩  | 0<x ∧ true}
+def triangle2 : Set (ℝ×ℝ) := {⟨x,y⟩  | x>0 ∧ true}

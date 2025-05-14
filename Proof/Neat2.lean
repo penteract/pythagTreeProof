@@ -34,7 +34,7 @@ def unit_sq : Set R2 := {⟨ x , y ⟩ | 0<x ∧ x<1 ∧ 0<y ∧ y<1 }
 
 def treeFun (s : Set R2) : Set R2 := d0 '' s ∪ d1 '' s ∪ unit_sq
 
-theorem constx_mono {β} {x:α} [Preorder α] [Preorder β]: Monotone (Function.const β x) := by
+theorem constx_mono {α β} {x:α} [Preorder α] [Preorder β]: Monotone (Function.const β x) := by
   intro _ _ _
   rfl
 

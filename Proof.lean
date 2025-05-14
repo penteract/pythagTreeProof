@@ -2,6 +2,13 @@
 -- Import modules here that should be built as part of the library.
 import Proof.Basic
 import Proof.SquareDivision
-import Proof.Triangle
+import Proof.TriangleTest
+-- Test files:
+-- TriangleTest
+-- Statement
+-- Questions
+-- Neat
+-- Neat2
+-- Neat3
 
 open SquareDiv
