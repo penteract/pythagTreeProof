@@ -34,7 +34,7 @@ theorem tri_area : MeasureTheory.volume triangle = 1 / 2
   sorry
 -/
 -- Proof
-open SquareDiv
+--  open SquareDiv
 
 lemma cor_sq_eq_square : cor_sq = square (0,0) (1/2) := by
   unfold square cor_sq

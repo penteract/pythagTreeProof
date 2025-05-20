@@ -43,14 +43,14 @@ def corPos (xn : Fin 7) (yn : Fin 4) (cor : Cor) : ℤ × ℤ  := match cor with
 -- Finset or list?
 def treeMap (xn : Fin 7) (yn : Fin 4) (cor : Cor) : List Piece :=
   let ⟨px,py⟩  := (corPos xn yn cor)
-  if xn==3 && yn==0 then [fullPiece] else
-  if yn==1 && px>4 && px < 9 then (match cor with
+  if xn=3 ∧ yn=0 then [fullPiece] else
+  if yn=1 ∧ px>4 ∧ px < 9 then (match cor with
     | .bl => [trianglePiece Rot.left]
     | .tl => [trianglePiece Rot.none]
     | .tr => [trianglePiece Rot.right]
     | .br => [trianglePiece Rot.half]
   ) else List.flatMap (fun ⟨(⟨x,y⟩ : ℤ ×ℤ) ,r⟩ =>
-     if 0 ≤ x && x < 7  && 0≤ y && y<4
+     if 0≤x ∧ x<7 ∧ 0≤y ∧ y<4
         then [treePiece (Fin.ofNat' 7 (Int.toNat x)) (Fin.ofNat' 4 (Int.toNat y)) r]
         else []
     )

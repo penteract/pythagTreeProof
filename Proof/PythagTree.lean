@@ -44,6 +44,10 @@ example : d1 (4,0) = (4,1) := by
     norm_num
 
 
+theorem sq_ss_pyt :  Ioo 3 4 ×ˢ Ioo 0 1 ⊆ pythagTree := by
+  unfold pythagTree
+  rw [← map_lfp treeFun_m]
+  exact (le_sup_right)
 
 noncomputable def rotEighthLeftShrink : R2 ≃ₗ[ℝ] R2 := by
   let ml : Matrix (Fin 2) (Fin 2) ℝ := !![0.5, -0.5 ; 0.5, 0.5 ]
