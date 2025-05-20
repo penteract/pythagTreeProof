@@ -4,7 +4,7 @@ import Proof.Pieces
 open Set
 open OrderHom hiding id
 
-macro "R2" : term => `(ℝ × ℝ)
+-- macro "R2" : term => `(ℝ × ℝ)
 --def R2 := ℝ × ℝ
 
 open AffineMap
@@ -107,23 +107,15 @@ theorem lfp_f_eq_lfp_ff : lfp f = lfp (f.comp f) := by
     intro b h
     have lem : f (b ⊓ f b ) ≤ b ⊓ f b := by
       apply le_inf
-      --rel [f.mono,inf_le_right]
-      --rel [_]
       transitivity f (f b)
-      have k := @inf_le_right
-      mono
-      --rel [f.mono , @inf_le_right α _ b (f b) ]
-      --apply f.mono
-      --exact @inf_le_right α _ b (f b)
+      exact (f.mono inf_le_right)
       trivial
-      apply f.mono
-      exact inf_le_left
+      exact (f.mono inf_le_left)
     transitivity (b ⊓ f b)
     transitivity f (b ⊓ f b )
     apply sInf_le
     rw [mem_setOf_eq]
-    apply f.mono
-    exact lem
+    exact (f.mono lem)
     exact lem
     exact inf_le_left
   .

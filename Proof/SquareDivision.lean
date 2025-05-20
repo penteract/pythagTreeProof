@@ -7,7 +7,7 @@ open Prod
 open MeasureTheory
 open Set
 
-namespace SquareDiv
+--  namespace SquareDiv
 
 macro "R2" : term => `(ℝ × ℝ)
 
@@ -236,4 +236,4 @@ theorem cor_disj : Pairwise (Function.onFun Disjoint (fun i ↦ ⇑(corTransform
 theorem square_has_4_corners : Fintype.card Cor = 4 := by
   rfl
 
-end SquareDiv
+--  end SquareDiv

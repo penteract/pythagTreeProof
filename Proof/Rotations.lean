@@ -8,11 +8,6 @@ open Matrix
 open Prod
 open MeasureTheory
 
--- macro "R2" : term => `(ℝ × ℝ)
-
-
--- namespace SquareDiv
-open SquareDiv
 
 
 noncomputable def rotLeft : R2 ≃ₗ[ℝ] R2 := by

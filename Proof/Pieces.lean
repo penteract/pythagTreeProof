@@ -2,8 +2,6 @@ import Mathlib
 import Proof.SquareDivision
 import Proof.Rotations
 
-open SquareDiv
-
 inductive Piece : Type
   | treePiece : Fin 7 → Fin 4 → Rot → Piece
   | trianglePiece : Rot → Piece -- (triangle none) is bottom left half of unit_sq
@@ -35,29 +33,30 @@ theorem rotatep_hom(r : Rot) (r' : Rot) : rotatep (r + r') = rotatep r ∘ (rota
 
 
 -- TODO: carefully consider centering squares on integer coordinates
+
 -- doubled position of bottom left of corner
 def corPos (xn : Fin 7) (yn : Fin 4) (cor : Cor) : ℤ × ℤ  := match cor with
-    | .bl => (2*xn-6,2*yn)
-    | .tl => (2*xn-6,2*yn+1)
-    | .tr => (2*xn-5,2*yn+1)
-    | .br => (2*xn-5,2*yn)
+    | .bl => (2*xn,2*yn)
+    | .tl => (2*xn,2*yn+1)
+    | .tr => (2*xn+1,2*yn+1)
+    | .br => (2*xn+1,2*yn)
 -- Finset or list?
 def treeMap (xn : Fin 7) (yn : Fin 4) (cor : Cor) : List Piece :=
   let ⟨px,py⟩  := (corPos xn yn cor)
   if xn==3 && yn==0 then [fullPiece] else
-  if yn==1 && px>-2 && px < 3 then (match cor with
+  if yn==1 && px>4 && px < 9 then (match cor with
     | .bl => [trianglePiece Rot.left]
     | .tl => [trianglePiece Rot.none]
     | .tr => [trianglePiece Rot.right]
     | .br => [trianglePiece Rot.half]
-  ) else List.flatMap (fun ⟨(tp : ℤ ×ℤ) ,r⟩ => let⟨x,y⟩ := tp + (3,0)
+  ) else List.flatMap (fun ⟨(⟨x,y⟩ : ℤ ×ℤ) ,r⟩ =>
      if 0 ≤ x && x < 7  && 0≤ y && y<4
         then [treePiece (Fin.ofNat' 7 (Int.toNat x)) (Fin.ofNat' 4 (Int.toNat y)) r]
         else []
     )
-  [((py-3,-1-px),Rot.left),
-  ((px-2,py-4), Rot.none),((px+1,py-4), Rot.none),
-  ((4-py,px-3),Rot.right)
+  [((py,5-px),Rot.left),
+  ((px+1,py-4), Rot.none),((px-2,py-4), Rot.none),
+  ((10-py,px-9),Rot.right)
   ]
 -- In theory, I would like to have the same function transforming coordinates here as for transforming reals
 
