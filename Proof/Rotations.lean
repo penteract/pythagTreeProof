@@ -244,12 +244,6 @@ theorem cexp (a b:Fin 4 ) : (Circle.exp (π * ((a + b : Fin 4)) / 2 )) = Circle.
       symm
       exact (Nat.mod_mod_of_dvd _ (dvd_refl 4))
 
-
-lemma ll {A B} {a b : A} (f : A→ B) : a = b → f a = f b := by
-  intro a_1
-  subst a_1
-  simp_all only
-
 -- lemma aff_e (a b : P₁ ≃ᵃ[k] P₂): a=b ↔ (a:P_\) = b
 
 theorem rotTransform_hom (r:Rot) (r':Rot) : rotTransform (r + r') = AffineEquiv.trans (rotTransform r)  (rotTransform r') := by
@@ -260,8 +254,8 @@ theorem rotTransform_hom (r:Rot) (r':Rot) : rotTransform (r + r') = AffineEquiv.
   rw [conj_trans]
   simp only [ZMod.val]
   rw [cexp]
-  apply ll (fun x => conj x _)
-  apply ll (fun x => conj x Complex.equivRealProdLm.toAffineEquiv)
+  apply congrArg (fun x => conj x _)
+  apply congrArg (fun x => conj x Complex.equivRealProdLm.toAffineEquiv)
   apply AffineEquiv.coeFn_inj.mp
   rw [AffineEquiv.coe_trans]
   simp only [LinearEquiv.coe_toAffineEquiv,LinearIsometryEquiv.coe_toLinearEquiv]

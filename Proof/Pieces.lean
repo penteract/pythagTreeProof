@@ -45,9 +45,9 @@ def treeMap (xn : Fin 7) (yn : Fin 4) (cor : Cor) : List Piece :=
   let ⟨px,py⟩  := (corPos xn yn cor)
   if xn=3 ∧ yn=0 then [fullPiece] else
   if yn=1 ∧ px>4 ∧ px < 9 then (match cor with
-    | .bl => [trianglePiece Rot.left]
+    | .bl => [trianglePiece Rot.right]
     | .tl => [trianglePiece Rot.none]
-    | .tr => [trianglePiece Rot.right]
+    | .tr => [trianglePiece Rot.left]
     | .br => [trianglePiece Rot.half]
   ) else List.flatMap (fun ⟨(⟨x,y⟩ : ℤ ×ℤ) ,r⟩ =>
      if 0≤x ∧ x<7 ∧ 0≤y ∧ y<4

@@ -218,3 +218,25 @@ def tstl3 (z : ℤ ) : List (ℤ ×ℤ ) :=
 
 def triangle : Set (ℝ×ℝ) := {⟨x,y⟩  | 0<x ∧ true}
 def triangle2 : Set (ℝ×ℝ) := {⟨x,y⟩  | x>0 ∧ true}
+
+
+-- why isn't something like this solved by simp?
+lemma add_mess {a b c d e f g : ℝ } :
+ a +
+    (b +
+      (c +
+        (d +
+          (e + (f + g))))) =
+  g +
+    (f +
+      (d +
+        (c + (e
+          + (a + b)))))
+        := by
+        --aesop
+        sorry
+
+
+lemma l1 {x : ℝ } : 5 / 2 < 2 + x → 1<2*x := by
+  -- why is this tricky?
+  bound
