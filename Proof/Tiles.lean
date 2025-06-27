@@ -844,36 +844,22 @@ lemma l6 {a b c d: Set α } : a ⊔ (b ⊔ (c ⊔ d)) = a ∪ b ∪ c ∪ d := b
   simp only [← sup_assoc]
   rfl
 
-lemma l7
-(x y p1 p2 : ℝ)
-(h1 : (x, y) ∈ Ioo 0.5 2.5 ×ˢ Ioo 0 3.5)
-(h : p2 + 1 ≤ 0 ∨ 7 ≤ p2 ∨ 5 - p1 + 1 ≤ 0 ∨ 4 ≤ 5 - p1)
-(h3 : p1 / 2 < x ∧ x < (p1 + 1) / 2)
-(h4 : p2 / 2 < y ∧ y < (p2 + 1) / 2)
- : False := by
-  simp at h1
-  apply Or.elim h <;> (clear h)
-  intro h
-  have two_gt_z : 0<(2:ℝ) := by simp
-  bound
-  intro h
-  apply Or.elim h  <;> (clear h)
-  intro h
-  bound
-  intro h
-  apply Or.elim h  <;> (clear h)
-  bound
-  intro h
-  bound
-  sorry
+-- lemma l7
+-- {x y p1 p2 : ℝ}
+-- (h1 : (x, y) ∈ Ioo 0.5 2.5 ×ˢ Ioo 0 3.5)
+-- (h : p2 + 1 ≤ 0 ∨ 7 ≤ p2 ∨ 4 - p1 + 1 ≤ 0 ∨ 4 ≤ 4 - p1)
+-- (h3 : p1 / 2 < x ∧ x < (p1 + 1) / 2)
+-- (h4 : p2 / 2 < y ∧ y < (p2 + 1) / 2)
+--  : False := by
+--   simp at h1
+--   bound
 theorem subt_1
   (p : ℤ × ℤ )
-
   : (⇑(AffineEquiv.constVAdd ℝ (ℝ × ℝ) (-↑p.1, -↑p.2)) ∘ fun x ↦ 2 • x) '' (d0 ∘ d0 '' pythagTree) ∩ usq =
-  if 0 ≤ p.2 ∧ p.2 < 7 ∧ 0 ≤ 5 - p.1 ∧ 5 - p.1 < 4 then
+  if 0 ≤ p.2 ∧ p.2 < 7 ∧ 0 ≤ 4 - p.1 ∧ 4 - p.1 < 4 then
     getTile (Piece.treePiece (Fin.ofNat' 7 p.2.toNat) (Fin.ofNat' 4 (5 - p.1).toNat) «Rot».left)
   else ∅ := by
-  by_cases h : 0 ≤ p.2 ∧ p.2 < 7 ∧ 0 ≤ 5 - p.1 ∧ 5 - p.1 < 4
+  by_cases h : 0 ≤ p.2 ∧ p.2 < 7 ∧ 0 ≤ 4 - p.1 ∧ 4 - p.1 < 4
   . rw [if_pos h]
     sorry
   . rw [if_neg h]
@@ -899,31 +885,8 @@ theorem subt_1
     simp only [← ZR_le] at h
     -- simp at h
     simp only [Int.cast_add,Int.cast_sub,Int.cast_ofNat, Int.cast_zero,Int.cast_one] at h
-    let p1:ℝ :=↑p.1
-    have p1e : p1 = p.1 := by rfl
-    let p2:ℝ :=↑p.2
-    have p2e : p2 = p.2 := by rfl
-    -- rw [← p1e] at h3
-    -- simp_all [← p1e]
-    -- simp [← p1e] at  h3
-    simp only [←  p1e, ←  p2e] at h h1 h3 h4
-    -- obtain ⟨ p1,p2⟩  := p
-    --simp_all only [Prod.snd]
+    simp at h1
     bound
-    bound
-
-
-    simp_all only [Int.sub_nonneg, not_and, not_lt, d0, image_subset_iff, nsmul_eq_mul, Nat.cast_ofNat,
-      Function.comp_apply, AffineEquiv.constVAdd_apply, vadd_eq_add, mem_inter_iff, mem_image, Prod.exists,
-      Prod.mk.injEq, forall_exists_index, and_imp]
-    intro x_1 x_2 x_3 x_4 a a_1 a_2 a_3
-    subst a_2 a_1
-    obtain ⟨fst, snd⟩ := p
-    simp_all only
-    apply Aesop.BuiltinRules.not_intro
-    intro a_1
-    sorry
-    sorry
 
 theorem treeMap_makes_piece (cx : Fin 7) (cy : Fin 4) (cor : Cor):
   (corTransform cor '' usq) ∩ (getTile (.treePiece cx cy Rot.none)) =
@@ -1016,6 +979,7 @@ theorem treeMap_makes_piece (cx : Fin 7) (cy : Fin 4) (cor : Cor):
     . simp only [apply_ite (fun x => Multiset.sup (Multiset.ofList x))]
       rw [Multiset.coe_singleton,Multiset.sup_singleton,Multiset.coe_nil, Multiset.sup_zero]
       rw [Set.bot_eq_empty]
+      exact subt_1
 
       sorry
     -- apply (@l5 (ℝ×ℝ) _ _ _ _ usq)

@@ -54,11 +54,12 @@ def treeMap (xn : Fin 7) (yn : Fin 4) (cor : Cor) : List Piece :=
         then [treePiece (Fin.ofNat' 7 (Int.toNat x)) (Fin.ofNat' 4 (Int.toNat y)) r]
         else []
     )
-  [((py,5-px),Rot.left),
-  ((px+1,py-4), Rot.none),((px-2,py-4), Rot.none),
-  ((10-py,px-9),Rot.right)
+  [((py,4-px),Rot.left),
+  ((px-2,py-4), Rot.none),((px-5,py-4), Rot.none),
+  ((6-py,px-9),Rot.right)
   ]
 -- In theory, I would like to have the same function transforming coordinates here as for transforming reals
+-- (doesn't quite work because the bottom left corner when rotated isn't the bottom left corner overall)
 
 def pieceMap (p : Piece) (cor : Cor) : List (Piece) := match p with
   | treePiece xn yn r => List.map (rotatep r) (treeMap xn yn (rotCor (- r) cor))
