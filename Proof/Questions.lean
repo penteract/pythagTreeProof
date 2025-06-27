@@ -237,6 +237,113 @@ lemma add_mess {a b c d e f g : ℝ } :
         sorry
 
 
-lemma l1 {x : ℝ } : 5 / 2 < 2 + x → 1<2*x := by
-  -- why is this tricky?
+lemma lem {x : ℝ }  (h : 5 / 2 < 2 + x) : 1<2*x := by
+  -- bound
+  linarith
+
+lemma l2 {x : ℝ } : 5 / 2 < 2 + x ↔ 1<2*x:= by
+  apply Iff.intro <;> (intros; linarith)
+
+lemma lem2 {x y : ℝ } :
+  ((3 < x - y + 4 ∧ x < y) ∧ 0 < y + x ∧ y + x < 1) ∧ (0 < x ∧ 4 + x < 4.5) ∧ 3 / 2 < 1 + y ∧ 1 + y < 2 ↔
+  0 < x ∧ 1 < 2 * y ∧ 2 * x + (2 * y - 1) < 1 := by
+  apply Iff.intro
+  intro h
+  and_intros
   bound
+  linarith
+  bound
+  bound
+
+
+
+theorem thm (x : ℕ ) (h : x>0) :
+   7 = (match x with
+         | 5 => 8
+         | 0 => 2
+         | n => 3):= by
+  sorry
+
+
+
+
+lemma lemq {x y:ℝ}: (∃ a b, ((3 < a ∧ a < 4) ∧ 0 < b ∧ b < 1) ∧ (a + b + 4) * 0.5 = 4 + x ∧ (b - a + 6) * 0.5 = 1 + y) ∧
+    (0 < x ∧ 4 + x < 4.5) ∧ 3 / 2 < 1 + y ∧ 1 + y < 2 ↔
+      ∃ a b, (0 < a ∧ 0 < b ∧ a + b < 1) ∧ 2⁻¹ * a = x ∧ 2⁻¹ * b + 2⁻¹ = y
+  := by
+    have h (a b : ℝ) :(a + b + 4) * 0.5 = 4 + x ∧ (b - a + 6) * 0.5 = 1 + y
+      ↔ a = (x-y) + 4 ∧ b = y + x
+    := by
+      bound
+    have h' (a b : ℝ ) : 2⁻¹ * a  = x ∧ 2⁻¹ * b+ 2⁻¹ = y ↔ a = 2*x ∧ b = 2*y - 1 := by
+      bound
+    simp [h,h']
+    apply Iff.intro <;>
+      (intro
+       and_intros <;> linarith)
+
+open Set
+lemma lem3 : (fun x ↦ (4, 1) + x) ⁻¹' ((fun a ↦ ((a.1 + a.2 + 4) * 0.5, (a.2 - a.1 + 6) * 0.5)) '' Ioo 3 4 ×ˢ Ioo 0 1) ∩
+    (fun x ↦ (4, 1) + x) ⁻¹' Ioo (4:ℝ) (4.5:ℝ) ×ˢ Ioo (3 / 2 :ℝ ) (2:ℝ) =
+  (fun (a:ℝ×ℝ ) ↦ (2:ℝ)⁻¹ • a + (0, 2⁻¹)) '' {(x, y) | 0 < x ∧ 0 < y ∧ x + y < 1}
+   := by
+   ext ⟨x,y⟩
+   simp
+   exact lemq
+
+def corPos (xn : Fin 7) (yn : Fin 4) (cor : Cor) : ℤ × ℤ  := match cor with
+  | .bl => (2*xn,2*yn)
+  | .tl => (2*xn,2*yn+1)
+  | .tr => (2*xn+1,2*yn+1)
+  | .br => (2*xn+1,2*yn)
+
+def corPos' (cor : Cor) : ℤ × ℤ  := match cor with
+  | .bl => (2,2)
+  | .tl => (2,2+1)
+  | .tr => (2+1,2+1)
+  | .br => (2+1,2)
+
+theorem second_gen_squares
+  (cor : Cor)
+  (hh : cor= cor)
+  : (∅ : Set R2) =
+      Multiset.sup (List.map (fun (x:Set R2) => x)
+            (match cor with
+              | Cor.bl => [∅]
+              | Cor.tl => [triangle]
+              | Cor.tr => [∅]
+              | Cor.br => [∅])) := by
+  sorry
+theorem second_gen_squares'
+  (cor : Cor)
+
+  : ( cor= cor) → (∅ : Set R2) =
+      Multiset.sup (List.map (fun (x:Set R2) => x)
+            (match cor with
+              | Cor.bl => [∅]
+              | Cor.tl => [triangle]
+              | Cor.tr => [∅]
+              | Cor.br => [∅])) := by
+  intro h
+  exact (second_gen_squares cor h)
+  sorry
+
+inductive Test : Type where
+  | test1 : Test
+  | test2 : Test
+  deriving DecidableEq
+theorem match_test
+  (t : Test) (h:t=t)
+  : (∅ : Set ℝ) =
+            (match t with
+              | Test.test1 => ∅
+              | Test.test2 => ∅ ) := by
+  sorry
+theorem match_test'
+  (t : Test)
+  : t=t → (∅ : Set ℝ) =
+            (match t with
+              | Test.test1 => ∅
+              | Test.test2 => ∅ ) := by
+  intro h
+  exact (match_test t h)

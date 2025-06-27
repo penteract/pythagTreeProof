@@ -77,7 +77,21 @@ noncomputable def corTransform (cor : Cor) : (R2 →ᵃ[ℝ] R2) := match cor wi
   | Cor.tr => LinearMap.toAffineMap ((1/2 : ℝ ) • LinearMap.id)
                 + (AffineMap.const ℝ R2 (1/2,1/2))
 
+noncomputable def corTransform' (cor : Cor) : (R2 ≃ᵃ[ℝ] R2) := match cor with
+  | Cor.bl => AffineEquiv.homothetyUnitsMulHom 0 (Units.mk0 (1/2) (by simp))
+  | Cor.br => AffineEquiv.homothetyUnitsMulHom (1,0) (Units.mk0 (1/2) (by simp))
+  | Cor.tl => AffineEquiv.homothetyUnitsMulHom (0,1) (Units.mk0 (1/2) (by simp))
+  | Cor.tr => AffineEquiv.homothetyUnitsMulHom (1,1) (Units.mk0 (1/2) (by simp))
 
+theorem corTransform_same : (corTransform cor : R2 → R2) = corTransform' cor := by
+  fin_cases cor <;>(
+    unfold corTransform corTransform'
+    simp
+    ext ⟨x,y⟩ <;>(
+      rw [AffineMap.homothety_apply]
+      norm_num <;> linarith
+      )
+  )
 
 /-
 theorem corners_disj : Pairwise (Disjoint on (λ c:Cor => corTransform c '' unit_sq ) ) := sorry
