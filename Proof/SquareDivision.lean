@@ -247,6 +247,27 @@ theorem cor_disj : Pairwise (Function.onFun Disjoint (fun i ↦ ⇑(corTransform
         )
     )
 
+
+theorem cor_ss_sq {i:Cor} : corTransform i '' usq ⊆  usq := by
+  --simp
+  -- intro i
+  --rw [← image_subset_iff]
+  unfold usq
+  rw [sq_cors]
+  cases i <;>(
+    simp [corTransform, square]
+    try (
+      rw [prod_subset_prod_iff]
+      apply Or.inl
+      apply And.intro
+    )
+  )<;>(
+    intro x
+    simp
+    norm_num
+    bound
+  )
+
 theorem square_has_4_corners : Fintype.card Cor = 4 := by
   rfl
 
