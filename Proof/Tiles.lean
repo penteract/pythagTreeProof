@@ -1258,11 +1258,8 @@ theorem treeMap_makes_piece (cx : Fin 7) (cy : Fin 4) (cor : Cor):
 theorem pieceMap_rot : rotTransform r '' getTile p = getTile (rotatep r p) := by
   rcases p  with ⟨ x,y,rr ⟩|rr|⟨⟩|⟨⟩
   -- unfold getTile
-  simp only [getTile, rotatep] -- TODO: see change to getTile(rot_inter_usq)
-  rw [Set.image_inter (EquivLike.injective _)]
-  rw [thm_rot]
-  rw [add_comm,rotTransform_hom,AffineEquiv.coe_trans]
-  rw [← image_comp,← image_comp]
+  simp only [getTile, rotatep,rot_inter_usq]
+  rw [add_comm,rotTransform_hom,AffineEquiv.coe_trans,image_comp]
   simp only [getTile, rotatep]
   rw [add_comm,rotTransform_hom,AffineEquiv.coe_trans]
   rw [← image_comp]
@@ -1271,9 +1268,24 @@ theorem pieceMap_rot : rotTransform r '' getTile p = getTile (rotatep r p) := by
   simp only [getTile, rotatep]
   exact thm_rot
 
+theorem pieceMap_rot_pointless : (fun x => rotTransform r '' x) ∘ getTile = getTile ∘ rotatep r := by
+  rw [funext_iff]
+  intro x
+  simp [-rotTransform]
+  rw [pieceMap_rot]
 
-theorem sup_map_pieceMap_rot (↑(List.map getTile
-   (List.map (rotatep rr) p))).sup = rotTransform r ''
+theorem sup_map_preimage : Multiset.sup (List.map (fun x => f ⁻¹' x) s) = f ⁻¹' Multiset.sup s := by
+  induction s with
+  | nil => simp
+  | cons ss ls h => simp_all
+
+theorem sup_map_pieceMap_rot : Multiset.sup (List.map getTile (List.map (rotatep rr) ps))
+    = rotTransform rr '' Multiset.sup (List.map getTile ps) := by
+    rw [← List.comp_map]
+    simp only [← pieceMap_rot_pointless]
+    simp only [← AffineEquiv.preimage_symm]
+    rw [List.comp_map]
+    rw [sup_map_preimage]
 
 
 
@@ -1301,14 +1313,27 @@ theorem pieceMap_makes_piece (p : Piece) (cor : Cor):
       rw [← rotT_inter_corsq]
       rw [getTile]
     | .treePiece px py rr =>
-      nth_rw 1 [getTile] -- TODO: see change to getTile(rot_inter_usq)
+      nth_rw 1 [getTile]
+      rw [rot_inter_usq]
       rw [inter_assoc]
       rw [Set.inter_eq_self_of_subset_right cor_ss_sq]
       rw [rotT_inter_corsq]
       have h := treeMap_makes_piece
-
       simp only [pieceMap]
-      nth_rw 1 [getTile]
+      rw [sup_map_pieceMap_rot]
+      rw [← image_comp]
+      rw [corT_comp_rotT]
+      rw [image_comp]
+      rw [← (h px py (rotCor (-rr) cor))]
+      simp only [Rot.none,getTile]
+      rw [(by simp : rotTransform 0 = AffineEquiv.refl ℝ _)]
+      simp [-rotTransform]
+      rw [inter_comm]
+      nth_rw 3 [inter_comm]
+      rw [← inter_assoc]
+      rw [Set.inter_eq_self_of_subset_left cor_ss_sq]
+      /-
+      nth_rw 1 [getTile.eq_def]
       rw[← pieceMap_rot]
       rw [rotT_inter_corsq]
       rw [triMap_makes_tri]
@@ -1316,3 +1341,4 @@ theorem pieceMap_makes_piece (p : Piece) (cor : Cor):
       rw[corT_comp_rotT]
       simp [pieceMap]
       sorry
+      -/
