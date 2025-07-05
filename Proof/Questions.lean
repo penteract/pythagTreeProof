@@ -332,18 +332,57 @@ inductive Test : Type where
   | test1 : Test
   | test2 : Test
   deriving DecidableEq
+
 theorem match_test
   (t : Test) (h:t=t)
-  : (∅ : Set ℝ) =
+  : (0:ℕ) =
             (match t with
-              | Test.test1 => ∅
-              | Test.test2 => ∅ ) := by
+              | Test.test1 => 0
+              | Test.test2 => 0 ) := by
   sorry
 theorem match_test'
   (t : Test)
-  : t=t → (∅ : Set ℝ) =
+  : t=t → (0:ℕ) =
             (match t with
-              | Test.test1 => ∅
-              | Test.test2 => ∅ ) := by
+              | Test.test1 => 0
+              | Test.test2 => 0 ) := by
   intro h
-  exact (match_test t h)
+  --exact (match_test t h)
+  sorry
+
+def f (x:ℝ) : Set R2 := sorry
+lemma ll : f hd ⊔ (f tl) ∩ ⇑(corTransform c) '' usq =
+    f hd ∪ (f tl) ∩ ⇑(corTransform c) '' usq := by
+    -- exact (sup_eq_union _ _)
+    -- rw [Set.sup_eq_union]
+    sorry
+
+
+inductive Piece : Type
+  | treePiece : Fin 7 → Fin 4 → ZMod 4 → Piece
+  | trianglePiece : ZMod 4 → Piece -- (triangle none) is bottom left half of unit_sq
+  | emptyPiece : Piece
+  | fullPiece : Piece
+  deriving DecidableEq,Ord
+
+
+
+-- Why does Multiset.sup_dedup need [DecidableEq α]?
+--   Why does Multiset.dedup need [DecidableEq α]?
+--     Why does Multiset.dedup need to be computable
+
+-- How to use loogle:
+-- 1) there's a theorem you know is true, suspect is in mathlib and you want to find it (or something close enough to it)
+-- search for the most general true form of the theorem you want (e.g AffineMap rather than LinearMap or AffineIsometryEquiv)
+-- leave quite a few underscores in, try various orders with commuting operators (including equality)
+-- 2) You want to prove something not too tricky (i.e. you wouldn't usually bother writing a proof out in paper)
+--    but have no idea what mathlib might provide to help you
+-- Do a search for the types and operations you're working with
+-- Look through the pages at https://leanprover-community.github.io for the types you care about,
+--  keeping an eye out for typeclass instances and stuff your types could be coerced/converted into.
+
+
+-- When should I try split a proof up?
+-- A: More often than I currently do
+
+-- How often is it easier to

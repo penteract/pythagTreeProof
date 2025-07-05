@@ -2,12 +2,20 @@ import Mathlib
 import Proof.SquareDivision
 import Proof.Rotations
 
+-- Is this a bad idea?
+instance : Ord Rot where
+  compare a b := compare a.val b.val
+
 inductive Piece : Type
   | treePiece : Fin 7 → Fin 4 → Rot → Piece
   | trianglePiece : Rot → Piece -- (triangle none) is bottom left half of unit_sq
   | emptyPiece : Piece
   | fullPiece : Piece
-  deriving DecidableEq
+  deriving DecidableEq,Ord
+
+instance: LT Piece := ltOfOrd
+instance: LE Piece := leOfOrd
+
 open Piece
 -- def pieces (s : Z2) (cor : Cor) : List (Piece) := sorry
 

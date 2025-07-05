@@ -126,9 +126,13 @@ theorem triangle_measurable: MeasurableSet triangle := by
       rw [Function.iterate_succ_apply']
       exact (triFun_measure_preserving ih)
   unfold triFun_m
-  unfold OmegaCompletePartialOrder.Continuous
-  unfold CompleteLattice.instOmegaCompletePartialOrder
-  simp
+  rw [OmegaCompletePartialOrder.ωScottContinuous_iff_monotone_map_ωSup]
+  --unfold OmegaCompletePartialOrder.Continuous
+  unfold CompleteLattice.instOmegaCompletePartialOrder -- I shouldn't do this, but it works for now
+  simp only [iSup_eq_iUnion, OrderHom.coe_mk, OmegaCompletePartialOrder.Chain.map_coe,
+    Function.comp_apply, exists_prop]
+  and_intros
+  . exact triFun_monotone
   intro c
   ext x
   unfold triFun
