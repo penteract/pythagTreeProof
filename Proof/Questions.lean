@@ -380,7 +380,7 @@ inductive Piece : Type
 -- Do a search for the types and operations you're working with
 -- Look through the pages at https://leanprover-community.github.io for the types you care about,
 --  keeping an eye out for typeclass instances and stuff your types could be coerced/converted into.
-
+-- Also, use simp? to find the theorems mathlib thinks you should definitely know about
 
 -- When should I try split a proof up?
 -- A: More often than I currently do

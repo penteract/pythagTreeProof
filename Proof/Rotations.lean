@@ -275,3 +275,77 @@ theorem rotCor_hom (r:Rot) (r':Rot) : rotCor (r + r') = rotCor r ∘ rotCor r' :
 theorem rcor_consistent {rot : Rot} {cor : Cor} :
   rotTransform rot '' (corTransform cor '' usq) = corTransform (rcor rot cor) '' usq := by
   sorry-/
+
+theorem t314 : (3:ZMod 4) + 1 = 0 := by
+  rfl
+
+lemma lvol {s : Set (ℝ ×ℝ) } : volume ((fun (a:ℝ×ℝ) ↦         (2⁻¹, 2⁻¹) + a) '' s) = volume s := by
+  simp only [Set.image_add_left, neg_mk, measure_preimage_add]
+
+lemma add_stuff [Add α ] {a:α } : (fun x => a + f x) = (fun x => a+x) ∘ f := by
+  ext x
+  simp
+lemma stuff_add {α} [Add α ] {f : α→α} {a:α } : (fun x => f (a+x)) = f ∘ (fun x => a+x) := by
+  ext x
+  simp
+
+
+lemma lfun (f : α → α ) : f = fun x => f x := by
+  rfl
+
+theorem rot_vol_l : MeasureTheory.volume s = MeasureTheory.volume (rotTransform Rot.left '' s) := by
+  simp only [rotTransform, «Rot».left, conj, one_div, AffineIsometryEquiv.toAffineEquiv_symm,
+     AffineEquiv.trans_apply, AffineIsometryEquiv.coe_toAffineEquiv, LinearEquiv.coe_toAffineEquiv,
+     AffineIsometryEquiv.coe_constVAdd, vadd_eq_add]
+  rw [add_stuff,Set.image_comp]
+  rw [lvol]
+  simp only [AffineIsometryEquiv.symm, AffineIsometryEquiv.constVAdd, AffineEquiv.constVAdd_symm,
+    neg_mk, AffineIsometryEquiv.coe_mk, AffineEquiv.constVAdd_apply, vadd_eq_add, map_add]
+  rw [add_stuff,Set.image_comp]
+  simp only [Set.image_add_left, neg_mk, measure_preimage_add]
+
+  rw [lfun (DFunLike.coe rotLeft)]
+  unfold rotLeft
+  simp only [toLinOfInv_apply]
+  rw [MeasureTheory.Measure.addHaar_image_linearMap]
+  simp
+
+
+
+--  Real.map_linearMap_volume_pi_eq_smul_volume_pi
+theorem rot_vol : MeasureTheory.volume s = MeasureTheory.volume (rotTransform r '' s) := by
+  fin_cases r
+  simp only [rotTransform, AffineEquiv.refl_apply, Set.image_id']
+  exact rot_vol_l
+  simp
+  nth_rw 2 [rot_vol_l]
+  rw [← Set.image_comp]
+  rw [← AffineEquiv.coe_trans]
+  rw [← rotTransform_hom]
+  simp [Rot.left,t314]
+  /-
+  rw [rotIsRotation]
+  unfold conj
+  --simp? [-rotation_apply]
+  simp? [-rotation_apply,-Complex.equivRealProdLm_apply,AffineIsometryEquiv.constVAdd]
+  rw [add_stuff,Set.image_comp]
+  rw [lvol]
+  rw [@stuff_add _ _ (fun a ↦
+        Complex.equivRealProdLm
+          ((rotation (Circle.exp (π * r.cast / 2))) (Complex.equivRealProdLm.toAffineEquiv.symm a))) (-2⁻¹, -2⁻¹)]
+  rw [Set.image_comp]
+  --rw [lvol]
+  --rw [measure_preimage_add]
+  rw [Set.image_add_left, neg_mk, measure_preimage_add]
+
+  have h := MeasureTheory.measurePreserving_add_left
+  simp only [one_div, AffineIsometryEquiv.toAffineEquiv_symm, ZMod.natCast_val,
+    AffineEquiv.trans_apply, AffineIsometryEquiv.coe_toAffineEquiv, LinearEquiv.coe_toAffineEquiv,
+    LinearIsometryEquiv.coe_toLinearEquiv, Complex.equivRealProdLm_apply,
+    AffineIsometryEquiv.coe_constVAdd, vadd_eq_add, mk_add_mk]
+  simp only [one_div, AffineIsometryEquiv.toAffineEquiv_symm, ZMod.natCast_val,
+    AffineEquiv.trans_apply, AffineIsometryEquiv.coe_toAffineEquiv, LinearEquiv.coe_toAffineEquiv,
+    LinearIsometryEquiv.coe_toLinearEquiv, rotation_apply, Circle.coe_exp, Complex.ofReal_div,
+    Complex.ofReal_mul, Complex.ofReal_ofNat, Complex.equivRealProdLm_apply, Complex.mul_re,
+    Complex.mul_im, AffineIsometryEquiv.coe_constVAdd, vadd_eq_add, mk_add_mk]
+-/

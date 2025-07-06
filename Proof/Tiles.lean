@@ -16,13 +16,14 @@ def getTile (p :Piece) : Set R2 := match p with
 
 -- triangle stuff
 
+/-
 lemma lem : f = fun x => f x := by
-  simp_all only
+  simp_all only -/
 
 lemma tri_in_sq : triangle ⊆ usq := by
   unfold triangle usq square
   intro ⟨ x,y⟩
-  simp
+  simp only [Set.mem_setOf_eq, NNReal.coe_one, zero_add, Set.mem_prod, Set.mem_Ioo, and_imp]
   bound
 
 theorem triMap_makes_tri (cor : Cor): triangle ∩ (corTransform cor '' usq) = (corTransform cor '' getTile (triangleMap cor)) := by

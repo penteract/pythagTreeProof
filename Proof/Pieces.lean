@@ -11,7 +11,7 @@ inductive Piece : Type
   | trianglePiece : Rot → Piece -- (triangle none) is bottom left half of unit_sq
   | emptyPiece : Piece
   | fullPiece : Piece
-  deriving DecidableEq,Ord
+  deriving DecidableEq,Ord,Repr
 
 instance: LT Piece := ltOfOrd
 instance: LE Piece := leOfOrd
@@ -74,6 +74,8 @@ def pieceMap (p : Piece) (cor : Cor) : List (Piece) := match p with
   | trianglePiece r => [rotatep r (triangleMap (rotCor (- r) cor))]
   | emptyPiece => []
   | fullPiece => [fullPiece]
+
+#eval pieceMap (Piece.treePiece 2 2 Rot.none) Cor.tl
 
 theorem pieceMap_rot_comm (p : Piece) (r : Rot) (cor:Cor) :
   pieceMap (rotatep r p) (rotCor r cor) = List.map (rotatep r) (pieceMap p cor) := by
