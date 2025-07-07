@@ -423,6 +423,9 @@ theorem vol_corners_sorted (ps : List Piece) : MeasureTheory.volume (getTiles ps
 theorem vol_full : MeasureTheory.volume (getTiles [Piece.fullPiece]) = 1 := by
   simp [getTiles,getTile,vol_usq]
 
+theorem vol_empty : MeasureTheory.volume (getTiles []) = 0 := by
+  simp [getTiles,getTile]
+
 #eval (canon_cor Cor.tl [Piece.treePiece 2 2 Rot.none])
 #eval (canon_cor Cor.tl [Piece.treePiece 2 1 0, Piece.treePiece 5 0 1])
 #eval (canon_cor Cor.tl [Piece.treePiece 3 0 1, Piece.treePiece 5 2 0])
