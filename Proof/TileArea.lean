@@ -285,7 +285,7 @@ def rotList (r :Rot) (ps : List Piece) : List Piece :=  List.map (rotatep r) ps
 
 -- List.max?_mem
 def canon_rot (ps : List Piece) : List Piece :=
-  if .fullPiece ∈ ps then [.fullPiece] else
+  if .fullPiece ∈ ps ∨ (∃ k, .treePiece 3 0 k ∈ ps) then [.fullPiece] else
     Option.get (@List.max? _ (maxOfLe)  (List.map (fun r => canonical (rotList r ps)) [Rot.none, Rot.left, Rot.half, Rot.right]))
     /- [(rotList Rot.none ps) , (rotList Rot.left ps),
                             (rotList Rot.half ps) , (rotList Rot.right ps)]-/
@@ -295,6 +295,7 @@ def canon_rot (ps : List Piece) : List Piece :=
     /- @min _ (minOfLe) (rotList Rot.none ps) (@min _ (minOfLe) (rotList Rot.left ps)
     (@min _ (minOfLe) (rotList Rot.half ps) (@min _ (minOfLe) (rotList Rot.right ps) )) -/
 
+
 lemma foldr_distrib {l:List α } {f : α → α}  {op : α → α → α} (h :∀ a b,  f (op a b) = op (f a) (f b)) : f (List.foldr op e l) = List.foldr (op) (f e) (List.map f l) := by
   induction l with
   | nil => simp
@@ -302,10 +303,25 @@ lemma foldr_distrib {l:List α } {f : α → α}  {op : α → α → α} (h :�
     simp [ih,h]
 
 
+theorem piece30_usq : (getTile ( Piece.treePiece 3 0 r) = usq) := by
+  simp only [getTile]
+  nth_rw 2 [← @thm_rot r]
+  apply congrArg
+  simp
+  unfold pythagTree
+  rw [← OrderHom.map_lfp]
+  simp [treeFun_m,treeFun, -OrderHom.map_lfp ]
+  transitivity (fun x ↦ (3, 0) + x) ⁻¹' Ioo 3 4 ×ˢ Ioo 0 1
+  . intro ⟨x,y⟩
+    unfold usq square
+    simp only [NNReal.coe_one, zero_add, mem_prod, mem_Ioo, mem_preimage, Prod.mk_add_mk,
+      lt_add_iff_pos_right, and_imp]
+    bound
+  exact Set.subset_union_right
 
 theorem rot_canon_rot : (∃ r:Rot, rotTransform r '' getTiles ps = getTiles (canon_rot ps)) := by
   unfold canon_rot
-  by_cases h : Piece.fullPiece ∈ ps
+  by_cases h : .fullPiece ∈ ps ∨ (∃ k, .treePiece 3 0 k ∈ ps)
   . simp only [if_pos h]
     use Rot.none
     simp only [rotTransform, «Rot».none, AffineEquiv.refl_apply, image_id']
@@ -318,7 +334,14 @@ theorem rot_canon_rot : (∃ r:Rot, rotTransform r '' getTiles ps = getTiles (ca
     unfold getTiles
     simp only [List.map_cons, List.map_nil, Multiset.coe_singleton, Multiset.sup_singleton,
       Multiset.mem_coe, List.mem_map]
-    use Piece.fullPiece
+    apply (Or.elim h)
+    . intro h
+      use Piece.fullPiece
+    . intro ⟨r,h⟩
+      use Piece.treePiece 3 0 r
+      nth_rw 2 [getTile.eq_def]
+      simp only
+      simp [h,piece30_usq]
   . simp only [if_neg h]
     -- simp only [Option.some_get]
     simp only [List.map_cons]
@@ -357,22 +380,48 @@ theorem rot_canon_rot : (∃ r:Rot, rotTransform r '' getTiles ps = getTiles (ca
     intro a b
     rw [image_union]
 
+
 theorem volume_sort : MeasureTheory.volume (getTiles ps) = MeasureTheory.volume (getTiles (canon_rot ps)) := by
   have ⟨ r, h⟩ := @rot_canon_rot ps
   rw [← h]
   rw [rot_vol]
 
-def canon_cor_rot (cor : Cor) (ps : List Piece) := canon_rot (List.flatMap (fun p => pieceMap p cor) ps)
+def rem_empty (ps : List Piece) : List Piece :=
+  if (List.getLast? ps) = some Piece.emptyPiece then List.dropLast ps else ps
 
-def vol_corners_sorted (ps : List Piece) : MeasureTheory.volume (getTiles ps) =
-  MeasureTheory.volume (getTiles (canon_cor_rot Cor.bl ps))/4 +
-  MeasureTheory.volume (getTiles (canon_cor_rot Cor.br ps))/4 +
-  MeasureTheory.volume (getTiles (canon_cor_rot Cor.tl ps))/4 +
-  MeasureTheory.volume (getTiles (canon_cor_rot Cor.tr ps))/4 := by
+-- List.dropLast_append_getLast?
+theorem getTiles_rem_empty : getTiles (rem_empty ps) = getTiles ps := by
+  unfold rem_empty
+  by_cases h : ps.getLast? = some Piece.emptyPiece
+  . rw [if_pos h]
+    unfold getTiles
+    nth_rw 2 [← List.dropLast_append_getLast? _ (Option.mem_def.mpr h)]
+    rw [List.map_append]
+    simp only [Multiset.sup_coe]
+    rw [List.foldr_append]
+    nth_rw 2 [← Multiset.sup_coe]
+    conv_rhs =>
+      lhs
+      simp only [List.map_cons, getTile, List.map_nil, Multiset.coe_singleton,
+        Multiset.sup_singleton]
+    simp only [bot_eq_empty]
+  . rw [if_neg h]
+
+
+
+def canon_cor_rot (cor : Cor) (ps : List Piece) := rem_empty (canon_rot (List.flatMap (fun p => pieceMap p cor) ps))
+
+theorem vol_corners_sorted (ps : List Piece) : MeasureTheory.volume (getTiles ps) =
+    MeasureTheory.volume (getTiles (canon_cor_rot Cor.bl ps))/4 +
+    MeasureTheory.volume (getTiles (canon_cor_rot Cor.br ps))/4 +
+    MeasureTheory.volume (getTiles (canon_cor_rot Cor.tl ps))/4 +
+    MeasureTheory.volume (getTiles (canon_cor_rot Cor.tr ps))/4 := by
   rw [vol_corners]
   unfold canon_cor canon_cor_rot
-  simp only [getTiles_canonical,← volume_sort]
+  simp only [getTiles_canonical,← volume_sort,getTiles_rem_empty]
 
+theorem vol_full : MeasureTheory.volume (getTiles [Piece.fullPiece]) = 1 := by
+  simp [getTiles,getTile,vol_usq]
 
 #eval (canon_cor Cor.tl [Piece.treePiece 2 2 Rot.none])
 #eval (canon_cor Cor.tl [Piece.treePiece 2 1 0, Piece.treePiece 5 0 1])
