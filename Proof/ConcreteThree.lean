@@ -3874,7 +3874,8 @@ def plistConcrete : List (List Piece) := [[],
  [Piece.treePiece 0 1 3, Piece.treePiece 1 2 2, Piece.treePiece 6 0 1, Piece.treePiece 6 1 3],
  [Piece.treePiece 0 1 3, Piece.treePiece 1 2 2, Piece.treePiece 6 0 1, Piece.treePiece 6 1 3, Piece.treePiece 6 3 1],
  [Piece.treePiece 0 1 3, Piece.treePiece 1 2 2, Piece.treePiece 6 0 1, Piece.treePiece 6 1 3, Piece.trianglePiece 2],
- [Piece.treePiece 0 1 3, Piece.treePiece 1 2 2, Piece.treePiece 6 1 3, Piece.trianglePiece 2],
+ [Piece.treePiece 0 1 3, Piece.treePiece 1 2 2, Piece.treePiece 6 1 3, Piece.trianglePiece 2]]
+def plistConcrete1 : List (List Piece) :=[
  [Piece.treePiece 0 1 3,
   Piece.treePiece 2 2 0,
   Piece.treePiece 3 1 3,
@@ -8643,7 +8644,8 @@ def plistConcrete : List (List Piece) := [[],
  [Piece.treePiece 0 3 3, Piece.trianglePiece 1],
  [Piece.treePiece 0 3 3, Piece.trianglePiece 1, Piece.trianglePiece 3],
  [Piece.treePiece 0 3 3, Piece.trianglePiece 2],
- [Piece.treePiece 0 3 3, Piece.trianglePiece 3],
+ [Piece.treePiece 0 3 3, Piece.trianglePiece 3]]
+def plistConcrete2 : List (List Piece) :=[
  [Piece.treePiece 1 0 0],
  [Piece.treePiece 1 0 3],
  [Piece.treePiece 1 0 3,
@@ -13575,7 +13577,8 @@ def plistConcrete : List (List Piece) := [[],
   Piece.treePiece 2 0 2,
   Piece.treePiece 4 0 3,
   Piece.treePiece 4 1 0,
-  Piece.treePiece 4 3 3],
+  Piece.treePiece 4 3 3]]
+def plistConcrete3 : List (List Piece) :=[
  [Piece.treePiece 1 0 3,
   Piece.treePiece 1 3 3,
   Piece.treePiece 2 0 2,
@@ -17285,7 +17288,8 @@ def plistConcrete : List (List Piece) := [[],
   Piece.treePiece 4 1 3,
   Piece.treePiece 4 3 2,
   Piece.treePiece 5 3 1,
-  Piece.trianglePiece 1],
+  Piece.trianglePiece 1]]
+def plistConcrete4 : List (List Piece) :=[
  [Piece.treePiece 1 1 3,
   Piece.treePiece 1 3 2,
   Piece.treePiece 2 3 1,
@@ -21322,3 +21326,6 @@ def plistConcrete : List (List Piece) := [[],
  [Piece.trianglePiece 1, Piece.trianglePiece 3],
  [Piece.trianglePiece 3],
  [Piece.fullPiece]]
+
+def plistConcreteTotal : List (List Piece) := plistConcrete++plistConcrete1++plistConcrete2++plistConcrete3++plistConcrete4
+#eval plistConcreteTotal.length

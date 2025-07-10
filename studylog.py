@@ -62,3 +62,26 @@ baseTree=[
   "Piece.treePiece 6 3 0"]
 res = list(r)[0]
 print(sum(res[ks[str([p])]] for p in baseTree))
+
+N = 40
+class C:
+    def __init__(self,s):
+        self.s=s
+    def __repr__(self):
+        return self.s
+# there's something at least quadratic in lean's list parser
+# we want to make lists of type 'List (List Piece × List (List Piece) × ℚ)'
+def genFile(N,fname):
+    with open(fname,mode="w") as f:
+        print("import Mathlib\nimport Proof.TileArea\n",file=f)
+        k = (len(ps)+N-1)//N
+        for part in range(N):
+            print(f"def part{part}: List (List Piece × List (List Piece) × ℚ) :=[",file=f)
+            top = min((part+1)*k,len(ps))
+            for j in range(k*part,top):
+                p=ps[j]
+                print(" ",(list(map(C,p[0])),[[C(x) for x in y] for y in p[1]],res[j]) ,","*(j!=top-1),file=f)
+            print(f"]",file=f)
+        print(f"def allparts: List (List Piece × List (List Piece) × ℚ) :=","++".join(f"part{part}" for part in range(N)),file=f)
+
+
