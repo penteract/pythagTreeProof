@@ -41,6 +41,7 @@ theorem test_linarith_Real {x y : ℝ } {f : ℝ→ ℝ }
   ( h : f x + f y = 8
       ∧ f x - f y = 2)
   : f x=5 := by
+  linear_combination (h.1 + h.2) / 2
   linarith
 
 theorem volFin : vol ps ≠ ⊤ := by
@@ -67,7 +68,6 @@ theorem vol_cors' (ps : List Piece) : vol' ps =
     vol' (canon_cor_rot Cor.br ps) / 4 +
     vol' (canon_cor_rot Cor.tl ps) / 4 +
     vol' (canon_cor_rot Cor.tr ps) / 4 := by
-
   have h:= @volFin ps
   simp_all only [vol_cors ps, vol']
   -- #check ENNReal.add_ne_top.mp h
@@ -80,6 +80,15 @@ theorem vol_cors' (ps : List Piece) : vol' ps =
   rw [← ENNReal.toReal_add h1 h2,
       ← ENNReal.toReal_add h3' h3,
       ← ENNReal.toReal_add h4' h4]
+
+theorem test_linarith_Real' {x y : ℝ } {f : ℝ→ ℝ }
+  ( h : f x + f y = 8
+      ∧ f x - f y = 2)
+  : f x=5 := by
+  have h' := vol_cors' []
+  linear_combination (norm:=try ring_nf) (h.1) / 2
+  linear_combination (h.2) / 2
+  linarith
 
 theorem vol_full' : vol' [Piece.fullPiece] = 1 := by
   simp [getTiles,getTile,vol_usq,vol,vol']
@@ -134,6 +143,7 @@ theorem init_vols : List.sum (init.map vol') = 128234130115474143688629975256166
       List.map_cons, List.map_nil,
         List.flatMap_cons, List.flatMap_nil, List.append_nil, List.cons_append, List.nil_append,
         Nat.reduceDiv, List.cons.injEq, and_true] at h
+  linear_combination
   simp [part1,part2,part3,part4,part5] at h
   simp [part6,part7,part8,part9,part10] at h
   simp [part11,part12,part13,part14,part15,part16,part17,part18,part19,part20] at h
@@ -145,10 +155,9 @@ theorem init_vols : List.sum (init.map vol') = 128234130115474143688629975256166
   simp [part71,part72,part73,part74,part75,part76,part77,part78,part79,part80] at h
   simp [part81,part82,part83,part84,part85,part86,part87,part88,part89,part90] at h
   simp [part91,part92,part93,part94,part95,part96,part97,part98,part99] at h
-  linarith
+  -- linarith
         -- ,,,,,,,,
   -- sorry
-
 /-theorem thconc : List.head (concretePieceMap (plist)) = List.head (allparts.map (fun (a,b,c) => (a,b))) := by
   native_decide-/
   -- sorry
