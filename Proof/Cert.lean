@@ -1,5 +1,6 @@
 import Mathlib
 import Proof.TileArea
+import Proof.Eqns
 
 -- vol' e.1 =sum(vol' e.2)/4; e.3 is the coefficient of this eqn for linear_combination
 def part0: List (List Piece × List (List Piece) × ℚ) :=[
@@ -3988,3 +3989,23 @@ def part99: List (List Piece × List (List Piece) × ℚ) :=[
 def allparts: List (List Piece × List (List Piece) × ℚ) := part0++part1++part2++part3++part4++part5++part6++part7++part8++part9++part10++part11++part12++part13++part14++part15++part16++part17++part18++part19++part20++part21++part22++part23++part24++part25++part26++part27++part28++part29++part30++part31++part32++part33++part34++part35++part36++part37++part38++part39++part40++part41++part42++part43++part44++part45++part46++part47++part48++part49++part50++part51++part52++part53++part54++part55++part56++part57++part58++part59++part60++part61++part62++part63++part64++part65++part66++part67++part68++part69++part70++part71++part72++part73++part74++part75++part76++part77++part78++part79++part80++part81++part82++part83++part84++part85++part86++part87++part88++part89++part90++part91++part92++part93++part94++part95++part96++part97++part98++part99
 def qFull:  ℚ := 12823413011547414368862997525616691741041579688920794331363953564934456759066858494476606822552437442098640979/877512406035620068631903180662851572553488753575243048137500508983979170248733422547196905684808937723408093
 def qEmpty:  ℚ := 11746934357449947552830291532943152290456105411186011016486060686616960007897677336844906536622212814156785625/877512406035620068631903180662851572553488753575243048137500508983979170248733422547196905684808937723408093
+--
+/-
+theorem thm : ∀ p ∈ allparts, p.2.1 = List.map (fun r => canon_cor_rot r p.1) [Cor.bl,Cor.br,Cor.tl,Cor.tr] := by
+  native_decide
+-/
+-- #eval! (Matrix.vecMul (fun e => e.val.snd) bigMat) (Subtype.mk [Piece.treePiece 3 3 0] sorry)
+
+
+/- This does run (in just over 10 minutes), but isn't the easiest version to work with
+theorem init_stuff : ∀ l ∈ [part0,part1,part2,part3,part4,part5,part6,part7,part8,part9,part10,part11,part12,part13,part14,part15,part16,part17,part18,part19,part20,part21,part22,part23,part24,part25,part26,part27,part28,part29,part30,part31,part32,part33,part34,part35,part36,part37,part38,part39,part40,part41,part42,part43,part44,part45,part46,part47,part48,part49,part50,part51,part52,part53,part54,part55,part56,part57,part58,part59,part60,part61,part62,part63,part64,part65,part66,part67,part68,part69,part70,part71,part72,part73,part74,part75,part76,part77,part78,part79,part80,part81,part82,part83,part84,part85,part86,part87,part88,part89,part90,part91,part92,part93,part94,part95,part96,part97,part98,part99],
+    ∀ p ∈ l.map (fun (a,b,c) => a), List.sum  (allparts.map
+    (fun (a,b,c)=> c * ((if a=p then 4 else 0)
+      - (b.map (fun x => if x=p then 1 else 0)).sum) ))
+      = if p ∈ init then 1 else 0 := by
+  intro l hl
+  fin_cases hl <;> (
+    intro p hp
+    fin_cases hp <;> native_decide
+    )
+-/

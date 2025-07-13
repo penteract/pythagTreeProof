@@ -371,6 +371,21 @@ inductive Piece : Type
 --   Why does Multiset.dedup need [DecidableEq α]?
 --     Why does Multiset.dedup need to be computable
 
+
+-- what is the difference between `decide` and  `with_unfolding_all decide`?
+
+-- Why are sums so painful to work with?
+   -- It won't
+   -- !!very important solution: Finset.sum_coe_sort
+#check Finset.sum_toList
+variable (s : Finset α )
+-- lemma Finset_sum_nonsense (∑ x : s, )
+
+theorem prod_extend_by_one {M ι} {k:M}  [CommMonoid M] [DecidableEq ι] (s : Finset ι) (f : ι → M) :
+    ∏ i ∈ s, (if i ∈ s then f i else k) = ∏ i ∈ s, f i :=
+  (Finset.prod_congr rfl) fun _i hi => if_pos hi
+
+
 -- How to use loogle:
 -- 1) there's a theorem you know is true, suspect is in mathlib and you want to find it (or something close enough to it)
 -- search for the most general true form of the theorem you want (e.g AffineMap rather than LinearMap or AffineIsometryEquiv)

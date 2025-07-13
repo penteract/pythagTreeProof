@@ -248,7 +248,10 @@ theorem vol_corners (ps : List Piece) : MeasureTheory.volume (getTiles ps) =
     (S := usq) (A := getTiles ps) (t:= fun i s => corTransform i '' s) (fun c => getTiles (canon_cor c ps))]
   . rw [tsum_fintype]
     unfold Finset.univ
-    simp [Cor.fintype]
+    simp only [Cor.fintype, Multiset.insert_eq_cons, Finset.mk_cons, Finset.cons_eq_insert,
+      Finset.mem_insert, reduceCtorEq, Finset.mem_mk, Multiset.mem_singleton, or_self,
+      not_false_eq_true, Finset.sum_insert, Finset.sum_mk, Multiset.map_singleton,
+      Multiset.sum_singleton]
     simp only [vol_quater]
     simp only [add_assoc]
   . simp [usq,vol_sq]

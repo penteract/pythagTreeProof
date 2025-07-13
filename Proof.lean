@@ -3,7 +3,7 @@
 import Proof.Basic
 import Proof.SquareDivision
 -- import Proof.TriangleTest
-import Proof.Concrete
+import Proof.CertProof
 -- Test files:
 -- TriangleTest
 -- Statement

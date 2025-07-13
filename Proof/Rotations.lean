@@ -217,7 +217,7 @@ lemma l (a b : ℝ ) : a * 2⁻¹ + b * 2⁻¹ ≡ (a + b) % 4 * 2⁻¹ [PMOD 2]
   simp [AddComGroup.ModEq]
   sorry
 -/
-lemma l (n : Nat) (a b : Fin n): a + b ≡ (a + b : Fin n) [ZMOD n] := by
+lemma lemFinSumZMod (n : Nat) (a b : Fin n): a + b ≡ (a + b : Fin n) [ZMOD n] := by
   rw [Lean.Omega.Fin.ofNat_val_add]
   rw [Int.ModEq.eq_1]
   symm
