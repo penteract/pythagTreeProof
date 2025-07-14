@@ -57,3 +57,8 @@ theorem thmdot2 {s : Finset β } (f g : β  → ℝ) : dotProduct (Subtype.restr
     @Finset.sum β ℝ _ s (fun x => f x * g x) := by
   rw [← Finset.sum_coe_sort s (fun x => f x * g x)]
   rfl
+
+
+def fromAllParts : (α× (List α) × ℚ) → (List (α × ℚ) × ℚ)  := (fun x ↦
+          match x with
+          | (a, b, q) => ((a, 4) :: List.map (fun x ↦ (x, -1)) b, q))

@@ -379,11 +379,21 @@ inductive Piece : Type
    -- !!very important solution: Finset.sum_coe_sort
 #check Finset.sum_toList
 variable (s : Finset α )
+
+#check Finset.sum -- {α : Type u_3} → {β : Type u_4} → [AddCommMonoid β] → Finset α → (α → β) → β
+-- @Finset.sum a r _ b (f:a → r) = ∑ x ∈ b, f x
+
+-- @Finset.sum b r _ b (f:b → r) = ∑ x, f x
+
 -- lemma Finset_sum_nonsense (∑ x : s, )
 
 theorem prod_extend_by_one {M ι} {k:M}  [CommMonoid M] [DecidableEq ι] (s : Finset ι) (f : ι → M) :
     ∏ i ∈ s, (if i ∈ s then f i else k) = ∏ i ∈ s, f i :=
   (Finset.prod_congr rfl) fun _i hi => if_pos hi
+
+-- Q: Why is the stack overflowing every time I make a type error?
+-- A: use @irreducible on the incredibly large datum
+
 
 
 -- How to use loogle:

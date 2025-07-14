@@ -54,22 +54,10 @@ theorem vol_full' : vol' [Piece.fullPiece] = 1 := by
 theorem vol_empty' : vol' [] = 0 := by
   simp [getTiles,getTile,vol,vol']
 
--- #eval allParts_describes_pyt
-
-theorem list_sum_eq_or_zero [DecidableEq α ] {s : Finset α} {v : s} {e : List (α × ℚ)} :
-   (List.map (fun x ↦
-                  match x with
-                  | (a, q) => if a = v.val then q else 0)
-                e).sum = _
-                := by
-  sorry
---   ∀ p ∈ allparts,
--- p.2.1 = List.map (fun r ↦ canon_cor_rot r p.1) [Cor.tl, Cor.br, Cor.bl, Cor.tr]
-
 
 -- theorem bigMat_is_system1 : bigMat
-theorem fromAllParts_pyt_eqns {a b q} (h : (a,b,q) ∈ allparts) : fromAllParts (a,b,q) ∈ pyt_eqns.toFinset := by
-  unfold pyt_eqns fromAllParts
+theorem fromAllParts_pyt_eqns {a b q} (h : (a,b,q) ∈ allparts) : Eqns.fromAllParts (a,b,q) ∈ pyt_eqns.toFinset := by
+  unfold pyt_eqns Eqns.fromAllParts
   simp_all only [List.mem_toFinset, List.mem_map, Prod.mk.injEq, List.cons.injEq, and_true, Prod.exists,
     exists_eq_right_right]
   apply Exists.intro
@@ -89,14 +77,14 @@ def pyt_eqns_to_part ( e : pyt_eqns.toFinset) : List Piece × List (List Piece) 
 def cors := [Cor.tl, Cor.br, Cor.bl, Cor.tr]
 
 theorem expand_mat {a b q} (h : (a,b,q) ∈ allparts) {hh}:
-    bigMat (Subtype.mk (fromAllParts (a,b,q)) hh /-(fromAllParts_pyt_eqns h)-/) x
+    bigMat (Subtype.mk (Eqns.fromAllParts (a,b,q)) hh /-(fromAllParts_pyt_eqns h)-/) x
     = (if a = ↑x then 4 else 0) + (List.map (fun y ↦ if canon_cor_rot y a = ↑x then -1 else 0) cors).sum
      := by
   unfold bigMat
   unfold pyt_eqns
   unfold Eqns.getMat
   simp only [Matrix.of_apply]
-  unfold fromAllParts
+  unfold Eqns.fromAllParts
   simp only [List.map_cons, List.map_map, List.sum_cons]
   conv_lhs =>
     rhs
@@ -129,9 +117,8 @@ lemma a_in_allvars (h : (a, b, q) ∈ allparts) : a∈ Eqns.all_vars pyt_eqns :=
   use a
   use b
   exact List.mem_cons_self
+def aps := allparts
 
-lemma a_in_allvars' (h : (a, b, q) ∈ allparts) : a∈ Eqns.all_vars pyt_eqns := by
-  sorry
 
 lemma stuff_in_allvars (h : (a, b, q) ∈ allparts) : canon_cor_rot cor a ∈  Eqns.all_vars pyt_eqns := by
   unfold Eqns.all_vars
@@ -154,11 +141,29 @@ lemma stuff_in_allvars (h : (a, b, q) ∈ allparts) : canon_cor_rot cor a ∈  E
     fin_cases cor <;> trivial
   simp_all only [List.mem_map, Prod.mk.injEq, and_true, exists_eq_right]
 
-theorem subtype_eq {s : Finset ι} {a:ι} {b : s} (h :a∈ s) : a = b ↔ Subtype.mk a h = b := by
+theorem subtype_eq {s : Finset ι} {a:ι} (b : s) (h :a∈ s) : a = b ↔ Subtype.mk a h = b := by
   rw [← Subtype.val_inj]
 
-theorem subtype_eq' {s : Finset ι} {a:ι} {b : s} (h :a∈ s) : a = b ↔ Subtype.mk a h = b := by
-  sorry
+
+#check ∑ x, x
+-- @Finset.sum ?m.8312 ?m.8312 ?m.8310 Finset.univ fun x ↦ x : ?m.8312
+
+#check ∑ x∈ Finset.univ, x
+-- @Finset.sum ?m.11450 ?m.11450 ?m.11452 ?m.11455 fun x ↦ x : ?m.11450
+
+theorem finset_list_sum [AddCommMonoid r] [Fintype s] (f : s → β → r)
+   : ∑ x ∈ s',  List.sum (List.map (f x) l) = List.sum (List.map (fun y => ∑ x∈ s', f x y) l) := by
+  induction l with
+  | nil => simp
+  | cons h t ih=>
+    simp only [List.map_cons, List.sum_cons]
+    rw [Finset.sum_add_distrib]
+    simp_all
+
+-- ∑ x, vol' ↑x * (List.map (Rat.cast ∘ fun y ↦ if canon_cor_rot y a = ↑x then -1 else 0) cors).sum
+
+
+
 -- set_option maxRecDepth 200
 theorem bigMat_vol_is_system :
     Matrix.mulVec (Matrix.map bigMat ((↑) : ℚ → ℝ ))
@@ -173,7 +178,7 @@ theorem bigMat_vol_is_system :
   simp only [Pi.zero_apply]
   simp only [Finset.sum_apply, Pi.smul_apply, Matrix.transpose_apply, Matrix.map_apply, smul_eq_mul,
     Pi.zero_apply]
-  have h : e = fromAllParts (a,b,q) := by
+  have h : e = Eqns.fromAllParts (a,b,q) := by
     rw [← edef]
     rfl
   simp only [h]
@@ -181,34 +186,106 @@ theorem bigMat_vol_is_system :
   simp only [Rat.cast_add, Rat.cast_list_sum, List.map_map]
   simp only [Subtype.restrict_apply, apply_ite, Rat.cast_ofNat, Rat.cast_zero]
   simp only [left_distrib, mul_ite, mul_zero]
-  have hh := (a_in_allvars' abqinallparts)
-  conv_lhs =>
-    rhs
-    ext x
-    lhs
+  -- have hh' := (a_in_allvars' (by sorry : [] ∈ Eqns.all_vars pyt_eqns))
+
+  simp only [subtype_eq _ (List.mem_toFinset.mpr (a_in_allvars abqinallparts))]
+  simp only [subtype_eq _ (List.mem_toFinset.mpr (stuff_in_allvars abqinallparts))]
+  rw [Finset.univ_eq_attach]
+  rw [Finset.sum_add_distrib]
+  -- rw [← Finset.univ_eq_attach]
+  simp only [← List.sum_map_mul_left]
+  simp only [Finset.sum_ite_eq, Finset.mem_attach, ↓reduceIte, Function.comp_apply, apply_ite,
+    Rat.cast_neg, Rat.cast_one, Rat.cast_zero, mul_neg, mul_one, mul_zero]
+  rw [finset_list_sum]
+  simp only [Finset.sum_ite_eq, Finset.mem_attach, ↓reduceIte]
+  rw [mul_comm]
+  rw [vol_cors'' a]
+  unfold cors
+  simp?
+  ring
+
+
+theorem thmst {s : Finset β} (f : β → ℝ) :(f∘(↑) : s→ ℝ ) = (Subtype.restrict _ f : { x // x ∈ s } → ℝ ) := by
+  rfl
+
+-- Finset.sum
+#check @Finset.sum
+theorem thmdot {s : Finset β } (f g : β → ℝ) : dotProduct (f∘(↑) : s→ ℝ )  (g ∘ (↑)) =
+    @Finset.sum β  ℝ _ s (fun x => f x * g x) := by
+  unfold dotProduct
+  simp only [Function.comp_apply]
+  rw [Finset.sum_coe_sort s (fun x => f x * g x)]
+  -- alternative proof:
+  -- rw [← Finset.sum_coe_sort s (fun x => f x * g x)]
+  -- rfl
+
+theorem thmdot2 {s : Finset β } (f g : β  → ℝ) : dotProduct (Subtype.restrict _ f : s → ℝ ) (Subtype.restrict _ g : s→ ℝ) =
+    @Finset.sum β ℝ _ s (fun x => f x * g x) := by
+  rw [← Finset.sum_coe_sort s (fun x => f x * g x)]
+  rfl
+
+
+#check RingHom.map_vecMul
+
+theorem allParts_makes_eqn_R :
+    Matrix.vecMul (fun e => e.val.snd) (Matrix.map bigMat ((↑) : ℚ → ℝ )) =
+    (fun v => Rat.cast (if v.val=[] then -qEmpty else
+              if v.val=[Piece.fullPiece] then -qFull else
+              if v.val ∈ init then 1 else 0 )) := by
+  -- have mvm := RingHom.map_vecMul (Rat.castHom ℝ) bigMat
+  ext v
+  have ap1 := congrFun (congrArg (Rat.castHom ℝ ∘ · ) allParts_makes_eqn) v
+  simp only [Function.comp_apply] at ap1
+  conv_lhs at ap1 =>
+    rw [RingHom.map_vecMul (Rat.castHom ℝ) bigMat (fun e => e.val.snd) v]
+    simp only [Rat.coe_castHom]
     enter [1]
-    apply (subtype_eq hh)
-    rw [subtype_eq hh]
+    ext x
+    simp only [Function.comp_apply]
+  simp only [eq_ratCast] at ap1
+  exact ap1
 
-  simp only [expand_mat]
-  unfold bigMat
-  unfold pyt_eqns
-  unfold Eqns.getMat
-  ext eqn
-  obtain ⟨ e, einmap ⟩ := eqn
-  simp only [List.mem_toFinset, List.mem_map, Prod.exists] at einmap
-  obtain ⟨ a,b,q,abqinallparts,edef⟩ := einmap
-  simp only [Pi.zero_apply]
-  simp only [Matrix.mulVec, Matrix.map_apply, Matrix.of_apply, Rat.cast_list_sum, List.map_map]
+-- theorem bigMat.map
 
-  simp only [List.mem_toFinset, List.mem_map, Prod.exists] at eqn
-  obtain ⟨ a,b ⟩ := eqn
-  sorry
+-- theorem nodup_av : Nodup (all_vars es) := by sorry
+theorem vol_inits_val : List.sum (List.map vol' init) = qFull * vol' [Piece.fullPiece] + qEmpty * vol' [] := by
+  have h := Eqns.mat_z bigMat_vol_is_system allParts_makes_eqn_R
+  --TODO!!
+  have es2 := es_makes_eqn
+  apply congrArg (fun f => ((↑):ℚ→ℝ) ∘ f ) at es2
+  rw [funext_iff] at es2
+  simp only [Function.comp_apply] at es2
+  simp only [mq_cast_r] at es2
+  rw [← funext_iff] at es2
+  have h := mat_z bigMat_vol_is_system allParts_makes_eqn
+  linear_combination (norm:=skip) h
+  -- unfold dotProduct
 
-
-
-
-
+  /-
+  simp only [add_zero]
+  simp only [apply_ite Rat.cast, Rat.cast_one, Rat.cast_ofNat, Rat.cast_zero, ite_mul, one_mul, zero_mul]
+  -/
+  have lem : (fun (x:{x //x∈ (all_vars es).toFinset}) ↦ (Rat.cast:ℚ→ ℝ ) (if x.val = 0 then 1 else if x.val = 2 then 5 else 0)) =
+              (fun (x:ℕ ) => (Rat.cast:ℚ→ℝ ) (if x = 0 then 1 else if x = 2 then 5 else 0)) ∘ Subtype.val := by
+      rfl
+  rw [lem]
+  rw [← thmst]
+  rw [thmdot]
+  simp only [apply_ite Rat.cast, Rat.cast_one, Rat.cast_ofNat, Rat.cast_zero, ite_mul, one_mul, zero_mul]
+  have h : (fun x ↦ if x = 0 then f x else if x = 2 then 5 * f x else 0) = (fun x ↦ (if x = 0 then f x else 0) + (if x = 2 then 5 * f x else 0)) := by
+    ext x
+    simp_all only
+    split
+    next h_1 =>
+      subst h_1
+      simp_all only [OfNat.zero_ne_ofNat, ↓reduceIte, add_zero]
+    next h_1 => simp_all only [zero_add]
+  rw [h]
+  rw [Finset.sum_add_distrib]
+  simp only [add_zero, Finset.sum_ite_eq', mem_toFinset]
+  unfold all_vars es
+  rw [f2one]
+  simp
 
 
 
@@ -292,62 +369,6 @@ theorem ttt {s : Finset β} : { x // x ∈ s } = s := by
 --   exact Finset.sum_coe_sort s f
 
 
-theorem thmst {s : Finset β} (f : β → ℝ) :(f∘(↑) : s→ ℝ ) = (Subtype.restrict _ f : { x // x ∈ s } → ℝ ) := by
-  rfl
-
--- Finset.sum
-#check @Finset.sum
-theorem thmdot {s : Finset β } (f g : β → ℝ) : dotProduct (f∘(↑) : s→ ℝ )  (g ∘ (↑)) =
-    @Finset.sum β  ℝ _ s (fun x => f x * g x) := by
-  unfold dotProduct
-  simp only [Function.comp_apply]
-  rw [Finset.sum_coe_sort s (fun x => f x * g x)]
-  -- alternative proof:
-  -- rw [← Finset.sum_coe_sort s (fun x => f x * g x)]
-  -- rfl
-
-theorem thmdot2 {s : Finset β } (f g : β  → ℝ) : dotProduct (Subtype.restrict _ f : s → ℝ ) (Subtype.restrict _ g : s→ ℝ) =
-    @Finset.sum β ℝ _ s (fun x => f x * g x) := by
-  rw [← Finset.sum_coe_sort s (fun x => f x * g x)]
-  rfl
-
-theorem nodup_av : Nodup (all_vars es) := by sorry
-theorem f0five : f 0 = 5:= by
-  have es2 := es_makes_eqn
-  apply congrArg (fun f => ((↑):ℚ→ℝ) ∘ f ) at es2
-  rw [funext_iff] at es2
-  simp only [Function.comp_apply] at es2
-  simp only [mq_cast_r] at es2
-  rw [← funext_iff] at es2
-  have h := mat_z es_is_system es2
-  linear_combination (norm:=skip) h
-  -- unfold dotProduct
-
-  /-
-  simp only [add_zero]
-  simp only [apply_ite Rat.cast, Rat.cast_one, Rat.cast_ofNat, Rat.cast_zero, ite_mul, one_mul, zero_mul]
-  -/
-  have lem : (fun (x:{x //x∈ (all_vars es).toFinset}) ↦ (Rat.cast:ℚ→ ℝ ) (if x.val = 0 then 1 else if x.val = 2 then 5 else 0)) =
-              (fun (x:ℕ ) => (Rat.cast:ℚ→ℝ ) (if x = 0 then 1 else if x = 2 then 5 else 0)) ∘ Subtype.val := by
-      rfl
-  rw [lem]
-  rw [← thmst]
-  rw [thmdot]
-  simp only [apply_ite Rat.cast, Rat.cast_one, Rat.cast_ofNat, Rat.cast_zero, ite_mul, one_mul, zero_mul]
-  have h : (fun x ↦ if x = 0 then f x else if x = 2 then 5 * f x else 0) = (fun x ↦ (if x = 0 then f x else 0) + (if x = 2 then 5 * f x else 0)) := by
-    ext x
-    simp_all only
-    split
-    next h_1 =>
-      subst h_1
-      simp_all only [OfNat.zero_ne_ofNat, ↓reduceIte, add_zero]
-    next h_1 => simp_all only [zero_add]
-  rw [h]
-  rw [Finset.sum_add_distrib]
-  simp only [add_zero, Finset.sum_ite_eq', mem_toFinset]
-  unfold all_vars es
-  rw [f2one]
-  simp
 
 
 

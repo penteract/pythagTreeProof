@@ -15,9 +15,18 @@ set_option maxHeartbeats 20000000
 set_option maxRecDepth 200000
 
 
-def pyt_eqns : List (List (List Piece × ℚ ) × ℚ)  := allparts.map (fun (a,b,q) => ((a,4)::b.map (·,-1) ,q) )
 
-def bigMat : Matrix pyt_eqns.toFinset (Eqns.all_vars pyt_eqns).toFinset ℚ := Eqns.getMat pyt_eqns
+def pyt_eqns : List (List (List Piece × ℚ ) × ℚ)  := allparts.map (fun (a,b,q) => ((a,4)::b.map (·,-1) ,q) )
+-- def pyt_eqns' : List (List (List Piece × ℚ ) × ℚ)  := allparts.map Eqns.fromAllParts
+/-
+def bigMat' : Matrix (allparts.map Eqns.fromAllParts).toFinset
+                    (Eqns.all_vars (allparts.map Eqns.fromAllParts)).toFinset
+                    ℚ := Eqns.getMat (allparts.map Eqns.fromAllParts)
+-/
+def bigMat : Matrix (pyt_eqns).toFinset
+                    (Eqns.all_vars (pyt_eqns)).toFinset
+                    ℚ := Eqns.getMat (pyt_eqns)
+
 
 -- takes a few seconds.
 -- This will be used to show that allparts form a system of linear equations
@@ -41,6 +50,7 @@ def hdap := allparts[1]!
 -- (considering reflections would also speed it up by a factor of 4)
 -- This uses the coefficients in allparts to combine the equations into the one we care about
 -- which gives the area of the Pythagoras tree
+
 theorem allParts_makes_eqn :
     Matrix.vecMul (fun e => e.val.snd) bigMat =
     (fun v => if v.val=[] then -qEmpty else

@@ -1,6 +1,7 @@
 import Mathlib
 import Proof.TileArea
-import Proof.CertProof
+-- import Proof.CertProof
+/-
 def allparts : List (List Piece × List (List Piece) × ℚ) := sorry
 
 def plist := (allparts.map (fun (a,b,c) => a))
@@ -36,7 +37,7 @@ theorem noChange : sum ll,
 (x:α) : l+1 = 0 := by
   sorry
 
-
+-/
 
 -- simp [allparts,part0,part1,part2,part3,part4,part5,part6,part7,part8,part9,part10,part11,part12,part13,part14,part15,part16,part17,part18,part19,part20,part21,part22,part23,part24,part25,part26,part27,part28,part29,part30,part31,part32,part33,part34,part35,part36,part37,part38,part39,part40,part41,part42,part43,part44,part45,part46,part47,part48,part49,part50,part51,part52,part53,part54,part55,part56,part57,part58,part59,part60,part61,part62,part63,part64,part65,part66,part67,part68,part69,part70,part71,part72,part73,part74,part75,part76,part77,part78,part79,part80,part81,part82,part83,part84,part85,part86,part87,part88,part89,part90,part91,part92,part93,part94,part95,part96,part97,part98,part99]
 
