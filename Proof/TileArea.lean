@@ -428,7 +428,7 @@ theorem vol_full : MeasureTheory.volume (getTiles [Piece.fullPiece]) = 1 := by
 
 theorem vol_empty : MeasureTheory.volume (getTiles []) = 0 := by
   simp [getTiles,getTile]
-
+/-
 #eval (canon_cor Cor.tl [Piece.treePiece 2 2 Rot.none])
 #eval (canon_cor Cor.tl [Piece.treePiece 2 1 0, Piece.treePiece 5 0 1])
 #eval (canon_cor Cor.tl [Piece.treePiece 3 0 1, Piece.treePiece 5 2 0])
@@ -439,3 +439,35 @@ theorem vol_empty : MeasureTheory.volume (getTiles []) = 0 := by
 #eval (canon_cor_rot Cor.br [Piece.treePiece 2 0 3, Piece.treePiece 4 0 0, Piece.trianglePiece 0])
 #eval (canon_cor_rot Cor.br [Piece.treePiece 6 0 3, Piece.trianglePiece 0])
 #eval (canon_cor_rot Cor.tl [Piece.treePiece 0 0 3, Piece.trianglePiece 3])
+-/
+
+def init : List (List Piece) :=
+  (List.finRange 7).flatMap
+    (fun i => (List.finRange 4).map
+      (fun j => [Piece.treePiece i j 0]))
+
+theorem eqn_parts_noDup : ([]::[Piece.fullPiece]::init).Nodup := by
+  decide
+
+noncomputable def vol := MeasureTheory.volume ∘ getTiles
+
+noncomputable def vol' (ps: List Piece) : ℝ  := ENNReal.toReal (vol ps)
+
+
+/-
+theorem vol_pyt_is_vol_inits : MeasureTheory.volume pythagTree = List.sum (List.map vol init) := by
+  rw [← List.sum_toFinset _ ]
+  rw [volume_sum_pieces'
+      (S := pythag_rect)
+      (B := Fin 7 × Fin 4)
+      (fun p => getTiles [Piece.treePiece p.1 p.2 0] )
+    ]
+  exact (List.Nodup.of_cons (List.Nodup.of_cons eqn_parts_noDup) )
+-/
+/-
+nth_rewrite 1 [volume_sum_pieces
+    (S := usq)
+     (A := getTiles ps)
+      (t:= fun i s => corTransform i '' s)
+       (fun c => getTiles (canon_cor c ps))]
+  -/

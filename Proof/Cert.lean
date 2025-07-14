@@ -1,5 +1,5 @@
 import Mathlib
-import Proof.TileArea
+import Proof.Pieces
 import Proof.Eqns
 
 -- vol' e.1 =sum(vol' e.2)/4; e.3 is the coefficient of this eqn for linear_combination

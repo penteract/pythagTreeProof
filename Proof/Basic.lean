@@ -16,7 +16,7 @@ open scoped Real NNReal ENNReal
 variable {α ι : Type*}
 
 variable {m : MeasureSpace α}
-variable {S A : Set α}
+variable {S A B : Set α}
 
 #check DFA.toNFA_correct
 
@@ -146,6 +146,98 @@ theorem volume_sum_pieces (f : ι → Set α)
       apply (MeasureTheory.measure_inter_add_diff₀)
       simp [mutis]
     _ = volume (A ∩ ⋃ i, t i S) := by
+      rw [mz]
+      ring
+
+
+
+theorem volume_sum_pieces' (f : ι → Set α)
+  -- If  S has finite volume
+  {sfinite : volume S < ⊤ }
+  -- and t i  are a collection of transformations that map S to pieces of itself
+  -- (S is a rep-tile)
+  {ssubs : ⋃ i, t i B ⊆ S}
+  {smakes : volume S = ∑' i, volume (t i B)} -- alternatively, S =ᵐ[volume] ⋃ i, t i S
+  {ts_disj : Pairwise (Function.onFun Disjoint (λ i => t i B))}
+  {measurable_tis : ∀ i, (MeasurableSet (t i B))}
+  {measurable_tifi : ∀ i, (MeasurableSet (t i (f i)))} -- The theorem is true without this assumption
+                                                       -- (certainly when ι is finite) but I think that
+                                                       -- would be a pain to prove
+                                                       -- (keep cutting µ(A) = µ(A ∩ t i S) + µ(A \ t i S) until what you're left with has measure 0 )
+  -- and A is a subset of S
+  { asub : A ⊆ S}
+  -- and t i (f i) combine make A (except for a measure zero bit)
+  {aparts : ∀ i , (A ∩ t i B) =  t i (f i)} :
+  -- then the volume of the pieces is the volume of A
+  volume A = ∑' i, volume (t i (f i)) := by
+  --simp
+  --intro sFinite subs smakes t_s_disj asub tf_meas aparts
+  have lem_tifisubtiS : ∀ i, t i (f i) ⊆ t i B := by
+    intro i
+    rw [← aparts i]
+    exact inter_subset_right
+    -- exact inf_le_right -- TODO!! find out why this sometimes breaks
+  have lem : ∑' i, volume (t i (f i)) = volume (⋃ i, t i (f i)) := by
+    apply eq_comm.mp
+    --rw [← tsum_fintype]
+    --apply @measure_iUnion _ α m.toMeasurableSpace volume _ _
+    apply measure_iUnion
+    apply (pairwise_disjoint_mono ts_disj)
+    exact lem_tifisubtiS
+
+    trivial
+  rw [lem]
+  -- have : _ := calc
+  --   (⋃ i, t i (f i)) = (⋃ i, A ∩ t i B) := by simp [aparts]
+  --   _ = A ∩ (⋃ i, t i B) := by simp [inter_iUnion]
+  rw [calc
+    (⋃ i, t i (f i)) = (⋃ i, A ∩ t i B) := by simp [aparts]
+    _ = A ∩ (⋃ i, t i B) := by simp [inter_iUnion]]
+  have mutis: MeasurableSet (⋃ i, t i B) := by
+    apply MeasurableSet.iUnion
+    simp [measurable_tis]
+  have saetis : volume (S \ ⋃ i, t i B) = 0 := by
+    have vsum : volume (S ∩ ⋃ i, t i B) + volume (S \ ⋃ i, t i B) = volume S  := by
+      --apply eq_comm.mp
+      apply measure_inter_add_diff
+      exact mutis
+    have : volume (S ∩ ⋃ i, t i B) ≤ volume S := by
+      calc volume (S ∩ ⋃ i, t i B)
+          ≤ volume (S ∩ ⋃ i, t i B) + volume (S \ ⋃ i, t i B) :=
+              le_add_right (le_refl (volume (S ∩ ⋃ i, t i B)))
+        _ = volume S := vsum
+    calc
+      volume (S \ ⋃ i, t i B)
+        = volume S - volume (S ∩ ⋃ i, t i B) := by
+          rw [← vsum]
+          apply eq_comm.mp
+          apply ENNReal.add_sub_cancel_left
+          apply ne_of_lt
+          calc volume (S ∩ ⋃ i, t i B)
+              ≤ volume S := this
+            _ < ⊤ := sfinite
+      _ = volume S - volume (⋃ i, t i B) := by rw [inter_eq_self_of_subset_right ssubs]
+      _ = volume S - ∑' i, volume (t i B) := by
+        rw [measure_iUnion]
+        trivial
+        trivial
+      --_ = volume S - ∑ i, volume (t i B) := by rw [← tsum_fintype]
+      _ = volume S - volume S := by rw [smakes]
+      _ = 0 := by simp
+  have  mz : volume (A \ ⋃ i, t i B) = 0 := by
+    apply le_antisymm
+    swap
+    exact bot_le
+    rw [← saetis]
+    apply (volume.mono)
+    apply Set.diff_subset_diff_left
+    exact asub
+  calc
+    volume A = volume (A ∩ ⋃ i, t i B) + volume (A \ ⋃ i, t i B) := by
+      apply eq_comm.mp
+      apply (MeasureTheory.measure_inter_add_diff₀)
+      simp [mutis]
+    _ = volume (A ∩ ⋃ i, t i B) := by
       rw [mz]
       ring
 

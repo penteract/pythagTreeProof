@@ -3,13 +3,10 @@ import Mathlib
 -- This takes about 100 seconds;
 -- I suspect the slow bit is parsing lists, which appears to be quadratic in the length of the list (hence why I've split the list into 100 parts)
 import Proof.Cert
+import Proof.TileArea
 
 import Proof.Eqns
 
-def init : List (List Piece) :=
-  (List.finRange 7).flatMap
-    (fun i => (List.finRange 4).map
-      (fun j => [Piece.treePiece i j 0]))
 
 set_option maxHeartbeats 20000000
 set_option maxRecDepth 200000
@@ -57,3 +54,11 @@ theorem allParts_makes_eqn :
               if v.val=[Piece.fullPiece] then -qFull else
               if v.val ∈ init then 1 else 0 ) := by
   with_unfolding_all native_decide
+
+
+
+def eqn_parts := ([]::[Piece.fullPiece]::init).toFinset
+
+
+theorem eqn_parts_ss_allvars : eqn_parts ⊆ (Eqns.all_vars pyt_eqns).toFinset := by
+  native_decide
