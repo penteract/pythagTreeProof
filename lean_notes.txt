@@ -1,5 +1,3 @@
-
-
 If you're working with components of pairs, deconstruct the pairs as soon as possible.
   obtain ⟨w,z⟩ := pt
 
@@ -9,3 +7,6 @@ To finish off inequalities:
 
 
 To rewrite something involving a bound variable, use simp instead of rw
+
+
+use @irreducible on very large data to avoid stack overflows with every type error
