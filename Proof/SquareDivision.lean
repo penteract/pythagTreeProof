@@ -93,6 +93,14 @@ theorem corTransform_same : (corTransform cor : R2 → R2) = corTransform' cor :
       )
   )
 
+theorem vol_rect (zlew : 0≤ w): MeasureTheory.volume (rect p w h) = ENNReal.ofReal (w * h) := by
+  unfold rect
+  unfold volume
+  unfold Measure.prod.measureSpace
+  rw [Measure.prod_prod]
+  rw [volume_Ioo,volume_Ioo]
+  simp [ENNReal.ofReal_mul zlew]
+
 /-
 theorem corners_disj : Pairwise (Disjoint on (λ c:Cor => corTransform c '' unit_sq ) ) := sorry
 -/
@@ -272,3 +280,12 @@ theorem square_has_4_corners : Fintype.card Cor = 4 := by
   rfl
 
 --  end SquareDiv
+theorem square_shift : (AffineEquiv.constVAdd ℝ (ℝ × ℝ) p) '' square p' s = square (p+p') s := by
+  unfold square
+  simp only [AffineEquiv.constVAdd_apply, vadd_eq_add, image_add_left, fst_add, snd_add]
+  ext ⟨x,y⟩
+  simp_all only [mem_preimage, mem_prod, fst_add, fst_neg, mem_Ioo, lt_neg_add_iff_add_lt, neg_add_lt_iff_lt_add,
+    snd_add, snd_neg]
+  apply Iff.intro <;>(
+    bound
+  )

@@ -406,8 +406,12 @@ theorem prod_extend_by_one {M ι} {k:M}  [CommMonoid M] [DecidableEq ι] (s : Fi
 -- Look through the pages at https://leanprover-community.github.io for the types you care about,
 --  keeping an eye out for typeclass instances and stuff your types could be coerced/converted into.
 -- Also, use simp? to find the theorems mathlib thinks you should definitely know about
+-- Searching for pure combinators (e.g. (?a→?b→?c)→(?a→?b)→?a→?c ) or things without any uncommon constants is hard. (Cannot search: No constants or name fragments in search pattern.)
+    -- If you're looking for stuff with no constants except equality,
+    -- congrArg, congrFun and funext might be what you're searching for
 
 -- When should I try split a proof up?
 -- A: More often than I currently do
 
--- How often is it easier to
+-- Prove small general theorems that let you concisely explain why a large specific statement is true
+--   This is often much easier than hammering at the big specific statement.

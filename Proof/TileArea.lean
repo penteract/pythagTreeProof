@@ -5,8 +5,6 @@ import Proof.Rotations
 import Proof.Basic
 open Set
 
-
-
 def getTiles (ps : List Piece) : Set R2 := Multiset.sup (List.map getTile ps)
 
 theorem getTiles_in_usq : getTiles ps ⊆ usq := by
@@ -453,17 +451,93 @@ noncomputable def vol := MeasureTheory.volume ∘ getTiles
 
 noncomputable def vol' (ps: List Piece) : ℝ  := ENNReal.toReal (vol ps)
 
+theorem uncurry_comp_mk : Function.uncurry f ∘ Prod.mk a = f a := by
+  rfl
 
-/-
+
+theorem flatMap_map_product : (List.flatMap (fun i ↦ List.map (f i) s) t) = List.map (Function.uncurry f) (List.product t s) := by
+  rw [List.product.eq_1]
+  rw [List.map_flatMap]
+  simp only [List.map_map,uncurry_comp_mk]
+
+theorem list_product_to_finset [DecidableEq α] {a : List α } [DecidableEq β] {b : List β}
+    : (List.product a b).toFinset = a.toFinset ×ˢ b.toFinset := by
+  apply Finset.Subset.antisymm
+  . intro ⟨x,y⟩ h
+    simp_all
+  . intro ⟨x,y⟩ h
+    simp_all
+
+theorem setOf_prod {p : α → Prop} {q : β → Prop} : {x | p x} ×ˢ {y | q y} = {(x,y) | p x ∧ q y} := by
+  rfl
+theorem pyr_is_r : pythag_rect = rect (0,0) 7 4 := by
+  unfold pythag_rect
+  unfold rect Ioo
+  rw [setOf_prod]
+  simp only [zero_add,and_assoc]
+
 theorem vol_pyt_is_vol_inits : MeasureTheory.volume pythagTree = List.sum (List.map vol init) := by
-  rw [← List.sum_toFinset _ ]
+  -- rw [← List.sum_toFinset _ (by decide)]
   rw [volume_sum_pieces'
       (S := pythag_rect)
-      (B := Fin 7 × Fin 4)
+      (ι := Fin 7 × Fin 4)
+      (B := usq)
+      (t := fun p s => (AffineEquiv.constVAdd ℝ (ℝ×ℝ) ⟨p.1, p.2⟩ '' s))
       (fun p => getTiles [Piece.treePiece p.1 p.2 0] )
     ]
-  exact (List.Nodup.of_cons (List.Nodup.of_cons eqn_parts_noDup) )
--/
+  . simp only [AffineEquiv.constVAdd_apply, vadd_eq_add, image_add_left, Prod.neg_mk,
+    MeasureTheory.measure_preimage_add]
+    unfold init
+    rw [flatMap_map_product]
+    rw [List.map_map]
+    rw [← List.sum_toFinset _ (by decide)]
+    rw [list_product_to_finset]
+    simp only [List.toFinset_finRange, Function.comp_apply]
+    rw [Finset.univ_product_univ]
+    simp only [Function.uncurry]
+    unfold vol
+    simp [tsum_fintype]
+  . rw [pyr_is_r]
+    rw [vol_rect (Nat.ofNat_nonneg _)]
+    exact ENNReal.ofReal_lt_top
+  . simp
+    intro a b ⟨x, y⟩
+    unfold usq square pythag_rect
+    have ha : (a.val : ℝ ) ≤ 6  := GCongr.natCast_le_natCast (Nat.le_sub_one_of_lt (Fin.isLt a))
+    have hb : (b.val:ℝ) ≤ 3  := GCongr.natCast_le_natCast (Nat.le_sub_one_of_lt  (Fin.isLt b))
+    simp only [NNReal.coe_one, zero_add, mem_preimage, Prod.mk_add_mk, mem_prod, mem_Ioo,
+      lt_neg_add_iff_add_lt, add_zero, neg_add_lt_iff_lt_add, mem_setOf_eq, and_imp]
+    have ha1 : 0≤ (a.val:ℝ) := Nat.cast_nonneg (a.val)
+    have hb1 : 0≤ (b.val:ℝ) := Nat.cast_nonneg (b.val)
+    bound
+  . rw [pyr_is_r]
+    rw [vol_rect (Nat.ofNat_nonneg _)]
+    simp only [AffineEquiv.constVAdd_apply, vadd_eq_add, image_add_left, Prod.neg_mk,
+      MeasureTheory.measure_preimage_add, vol_usq, ENNReal.tsum_one, ENat.card_eq_coe_fintype_card,
+      Fintype.card_prod, Fintype.card_fin, Nat.reduceMul, Nat.cast_ofNat, ENat.toENNReal_ofNat,
+      ENNReal.ofReal_eq_ofNat]
+    ring
+  . have h:= usqs_divide_rect 7 4
+    simp only [usq]
+    simp only [square_shift]
+    simp_all [PairwiseDisjoint,Set.pairwise_univ]
+  . intro i
+    exact affine_measurable _ usq_measurable
+  . intro i
+    simp only []
+    exact affine_measurable _ (getTiles_measurable _)
+  . exact pyt_in_rect
+  . unfold getTiles getTile
+    -- simp? [Set.preimage_preimage]
+    simp only [AffineEquiv.constVAdd_apply, vadd_eq_add, image_add_left, Prod.neg_mk, rotTransform,
+      conj, one_div, AffineIsometryEquiv.toAffineEquiv_symm, neg_neg, List.map_cons,
+      AffineEquiv.refl_apply, image_id', List.map_nil, Multiset.coe_singleton,
+      Multiset.sup_singleton, preimage_inter, preimage_preimage, Prod.forall]
+    intro a b
+    simp [← add_assoc,Prod.mk_zero_zero]
+
+  -- exact (List.Nodup.of_cons (List.Nodup.of_cons eqn_parts_noDup) )
+
 /-
 nth_rewrite 1 [volume_sum_pieces
     (S := usq)
