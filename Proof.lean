@@ -5,7 +5,7 @@ import Proof.SquareDivision
 import Proof.TileArea
 -- import Proof.TriangleTest
 import Proof.CertProof
-import Proof.NotConcreteFour
+import Proof.MatrixStuff
 -- Test files:
 -- TriangleTest
 -- Statement
@@ -59,5 +59,10 @@ theorem area_of_pythagoras_tree : MeasureTheory.volume pythagTree =
   exact (Ne.lt_top volFin)
 
 
+#print d0.eq_1
+#print d1.eq_1
+#print treeFun.eq_1
+#print treeFun_m.eq_1
+#print pythagTree.eq_1
 #check area_of_pythagoras_tree
 #print axioms area_of_pythagoras_tree
