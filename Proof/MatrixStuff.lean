@@ -107,6 +107,7 @@ lemma a_in_allvars (h : (a, b, q) ∈ allparts) : a∈ Eqns.all_vars pyt_eqns :=
   simp only [List.mem_dedup, List.mem_map, List.mem_flatMap, Prod.exists, exists_and_right,
     exists_eq_right]
   unfold pyt_eqns
+  unfold Eqns.fromAllParts
   simp only [List.mem_map, Prod.mk.injEq, Prod.exists, exists_eq_right_right]
   use 4
   apply Exists.intro
@@ -123,6 +124,7 @@ lemma stuff_in_allvars (h : (a, b, q) ∈ allparts) : canon_cor_rot cor a ∈  E
   simp only [List.mem_dedup, List.mem_map, List.mem_flatMap, Prod.exists, exists_and_right,
     exists_eq_right]
   unfold pyt_eqns
+  unfold Eqns.fromAllParts
   simp only [List.mem_map, Prod.mk.injEq, Prod.exists, exists_eq_right_right]
   use -1
   use ((a, 4) :: List.map (fun x ↦ (x, -1)) b)
@@ -168,10 +170,7 @@ theorem bigMat_vol_is_system :
   simp only [Pi.zero_apply]
   simp only [Finset.sum_apply, Pi.smul_apply, Matrix.transpose_apply, Matrix.map_apply, smul_eq_mul,
     Pi.zero_apply]
-  have h : e = Eqns.fromAllParts (a,b,q) := by
-    rw [← edef]
-    rfl
-  simp only [h]
+  simp only [← edef]
   simp only [expand_mat abqinallparts]
   simp only [Rat.cast_add, Rat.cast_list_sum, List.map_map]
   simp only [Subtype.restrict_apply, apply_ite, Rat.cast_ofNat, Rat.cast_zero]
@@ -210,8 +209,8 @@ theorem thmst {s : Finset β} (f : β → ℝ) :(f∘(↑) : s→ ℝ ) = (Subty
 
 theorem allParts_makes_eqn_R :
     Matrix.vecMul (fun e => e.val.snd) (Matrix.map bigMat ((↑) : ℚ → ℝ )) =
-    (fun v => Rat.cast (if v.val=[] then -qEmpty else
-              if v.val=[Piece.fullPiece] then -qFull else
+    (fun v => Rat.cast (if v.val=[] then -Eqns.qEmpty else
+              if v.val=[Piece.fullPiece] then -Eqns.qFull else
               if v.val ∈ init then 1 else 0 )) := by
   ext v
   have ap1 := congrFun (congrArg (Rat.castHom ℝ ∘ · ) allParts_makes_eqn) v
@@ -232,14 +231,14 @@ lemma sum_ss_mem_comp [AddCommMonoid M] (f : ι → M) {p : ι → Prop} [Decida
     ∑ x ∈ s.subtype p, (f ∘ Subtype.val) x = ∑ x ∈ s, f x := by
   exact (Finset.sum_subtype_of_mem f h)
 
+#check mat_z bigMat_vol_is_system allParts_makes_eqn_R
 
-
-theorem vol_inits_val' : List.sum (List.map vol' init) = qFull * vol' [Piece.fullPiece] + qEmpty * vol' [] := by
+theorem vol_inits_val' : List.sum (List.map vol' init) = Eqns.qFull * vol' [Piece.fullPiece] + Eqns.qEmpty * vol' [] := by
   have h := mat_z bigMat_vol_is_system allParts_makes_eqn_R
   have fn_eq_comp :
     (fun (v : (Eqns.all_vars pyt_eqns).toFinset) ↦
-      ((↑): ℚ→ℝ) (if v.val = [] then -qEmpty else if ↑v = [Piece.fullPiece] then -qFull else if ↑v ∈ init then 1 else 0) )
-    = (fun v ↦ ↑(if v = [] then -qEmpty else if v = [Piece.fullPiece] then -qFull else if v ∈ init then 1 else 0)) ∘ Subtype.val := by rfl
+      ((↑): ℚ→ℝ) (if v.val = [] then -Eqns.qEmpty else if ↑v = [Piece.fullPiece] then -Eqns.qFull else if ↑v ∈ init then 1 else 0) )
+    = (fun v ↦ ↑(if v = [] then -Eqns.qEmpty else if v = [Piece.fullPiece] then -Eqns.qFull else if v ∈ init then 1 else 0)) ∘ Subtype.val := by rfl
   rw [fn_eq_comp] at h
   -- rw [← thmst] at h
   simp only [apply_ite Rat.cast, Rat.cast_neg, Rat.cast_one, Rat.cast_zero, ite_mul, neg_mul,
@@ -274,6 +273,7 @@ theorem vol_inits_val' : List.sum (List.map vol' init) = qFull * vol' [Piece.ful
   rw [List.sum_toFinset _ eqn_parts_noDup] at h
   simp only [List.map_cons, ↓reduceIte, List.cons_ne_self, List.sum_cons] at h
   linear_combination (norm:=ring_nf) h
+  ring_nf
   rw [sub_eq_add_neg]
   simp only [sum_neg_distrib, List.map_map]
   rw [← List.sum_map_add]
@@ -281,7 +281,7 @@ theorem vol_inits_val' : List.sum (List.map vol' init) = qFull * vol' [Piece.ful
   simp [List.finRange_succ]
   exact eqn_parts_ss_allvars
 
-theorem vol_inits_val : List.sum (List.map vol' init) = qFull := by
+theorem vol_inits_val : List.sum (List.map vol' init) = Eqns.qFull := by
   rw [vol_inits_val']
   rw [vol_full',vol_empty']
-  ring
+  ring_nf

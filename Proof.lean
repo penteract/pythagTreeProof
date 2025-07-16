@@ -29,7 +29,7 @@ theorem area_of_pythagoras_tree : MeasureTheory.volume pythagTree =
   have h:=vol_inits_val
   unfold vol' at h
   erw [h]
-  simp [qFull]
+  simp [Eqns.qFull]
   simp
   intro x
   intro h

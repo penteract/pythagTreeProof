@@ -13,7 +13,7 @@ set_option maxRecDepth 200000
 
 
 
-def pyt_eqns : List (List (List Piece × ℚ ) × ℚ)  := allparts.map (fun (a,b,q) => ((a,4)::b.map (·,-1) ,q) )
+def pyt_eqns : List (List (List Piece × ℚ ) × ℚ)  := allparts.map Eqns.fromAllParts-- (fun (a,b,q) => ((a,4)::b.map (·,-1) ,q) )
 -- def pyt_eqns' : List (List (List Piece × ℚ ) × ℚ)  := allparts.map Eqns.fromAllParts
 /-
 def bigMat' : Matrix (allparts.map Eqns.fromAllParts).toFinset
@@ -50,8 +50,8 @@ def hdap := allparts[1]!
 
 theorem allParts_makes_eqn :
     Matrix.vecMul (fun e => e.val.snd) bigMat =
-    (fun v => if v.val=[] then -qEmpty else
-              if v.val=[Piece.fullPiece] then -qFull else
+    (fun v => if v.val=[] then -Eqns.qEmpty else
+              if v.val=[Piece.fullPiece] then -Eqns.qFull else
               if v.val ∈ init then 1 else 0 ) := by
   with_unfolding_all native_decide
 
