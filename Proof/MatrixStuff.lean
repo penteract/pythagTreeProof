@@ -2,6 +2,7 @@ import Mathlib
 import Proof.Eqns
 import Proof.CertProof
 import Proof.TileArea
+import Proof.List
 
 theorem volFin {ps : List Piece} : vol ps ≠ ⊤ := by
   apply (ne_top_of_lt (b:=⊤))
@@ -148,14 +149,6 @@ theorem subtype_eq {s : Finset ι} {a:ι} (b : s) (h :a∈ s) : a = b ↔ Subtyp
 #check ∑ x∈ Finset.univ, x
 -- @Finset.sum ?m.11450 ?m.11450 ?m.11452 ?m.11455 fun x ↦ x : ?m.11450
 
-theorem finset_list_sum [AddCommMonoid r] [Fintype s] (f : s → β → r)
-   : ∑ x ∈ s',  List.sum (List.map (f x) l) = List.sum (List.map (fun y => ∑ x∈ s', f x y) l) := by
-  induction l with
-  | nil => simp
-  | cons h t ih=>
-    simp only [List.map_cons, List.sum_cons]
-    rw [Finset.sum_add_distrib]
-    simp_all
 
 -- ∑ x, vol' ↑x * (List.map (Rat.cast ∘ fun y ↦ if canon_cor_rot y a = ↑x then -1 else 0) cors).sum
 
@@ -202,6 +195,14 @@ theorem bigMat_vol_is_system :
   ring
 
 
+
+theorem mat_z {m n : Type } [Fintype m] [Fintype n] {A : Matrix m n ℝ} {x r : n → ℝ} {v : m → ℝ}
+  (hAx : Matrix.mulVec A x = 0) (hqA : Matrix.vecMul v A = r) : dotProduct r  x = 0 := by
+  rw [← hqA]
+  rw [← Matrix.dotProduct_mulVec]
+  rw [hAx]
+  exact (dotProduct_zero _)
+
 theorem thmst {s : Finset β} (f : β → ℝ) :(f∘(↑) : s→ ℝ ) = (Subtype.restrict _ f : { x // x ∈ s } → ℝ ) := by
   rfl
 
@@ -212,22 +213,16 @@ theorem allParts_makes_eqn_R :
     (fun v => Rat.cast (if v.val=[] then -qEmpty else
               if v.val=[Piece.fullPiece] then -qFull else
               if v.val ∈ init then 1 else 0 )) := by
-  -- have mvm := RingHom.map_vecMul (Rat.castHom ℝ) bigMat
   ext v
   have ap1 := congrFun (congrArg (Rat.castHom ℝ ∘ · ) allParts_makes_eqn) v
   simp only [Function.comp_apply] at ap1
-  conv_lhs at ap1 =>
-    rw [RingHom.map_vecMul (Rat.castHom ℝ) bigMat (fun e => e.val.snd) v]
-    simp only [Rat.coe_castHom]
-    enter [1]
-    ext x
-    simp only [Function.comp_apply]
-  simp only [eq_ratCast] at ap1
+  rw [RingHom.map_vecMul (Rat.castHom ℝ) bigMat (fun e => e.val.snd) v] at ap1
+  rw [Rat.coe_castHom] at ap1
   exact ap1
 
 -- theorem bigMat.map
 
-theorem liftA2 {h : α → β → γ} {f : δ→ α } {f' : δ → β} {x : ε}
+theorem comp_both_args {h : α → β → γ} {f : δ→ α } {f' : δ → β} {x : ε}
    : h ((f ∘ g) x) ((f' ∘ g) x) = ((fun y => h (f y) (f' y)) ∘ g) x := by
    rfl
 
@@ -238,11 +233,9 @@ lemma sum_ss_mem_comp [AddCommMonoid M] (f : ι → M) {p : ι → Prop} [Decida
   exact (Finset.sum_subtype_of_mem f h)
 
 
-theorem sum_neg_distrib [AddCommGroup M] {xs : List M} : - List.sum xs = List.sum (List.map (fun x => -x) xs) := by
-  exact AddMonoidHom.map_list_sum (-AddMonoidHom.id M) xs
 
 theorem vol_inits_val' : List.sum (List.map vol' init) = qFull * vol' [Piece.fullPiece] + qEmpty * vol' [] := by
-  have h := Eqns.mat_z bigMat_vol_is_system allParts_makes_eqn_R
+  have h := mat_z bigMat_vol_is_system allParts_makes_eqn_R
   have fn_eq_comp :
     (fun (v : (Eqns.all_vars pyt_eqns).toFinset) ↦
       ((↑): ℚ→ℝ) (if v.val = [] then -qEmpty else if ↑v = [Piece.fullPiece] then -qFull else if ↑v ∈ init then 1 else 0) )
@@ -273,7 +266,7 @@ theorem vol_inits_val' : List.sum (List.map vol' init) = qFull * vol' [Piece.ful
     -- simp only [Finset.sum_const_zero,Function.comp_apply, ite_mul, neg_mul, one_mul, zero_mul, zero_add]
     -- #check Finset.sum_subtype_of_mem
   rw [← thmst] at h
-  simp only [liftA2] at h
+  simp only [comp_both_args] at h
   rw [sum_ss_mem_comp _ ] at h
   simp only [Finset.sum_const_zero, ite_mul, neg_mul, one_mul, zero_mul, zero_add] at h
   unfold eqn_parts at h

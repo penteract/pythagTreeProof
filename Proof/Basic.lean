@@ -7,7 +7,7 @@ import Mathlib.MeasureTheory.Measure.Lebesgue.Integral
 
 open Set Real MeasureTheory intervalIntegral MeasurableSet
 
-open scoped Real NNReal ENNReal
+open Real NNReal ENNReal
 
 
 

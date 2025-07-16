@@ -451,9 +451,10 @@ noncomputable def vol := MeasureTheory.volume ∘ getTiles
 
 noncomputable def vol' (ps: List Piece) : ℝ  := ENNReal.toReal (vol ps)
 
+
+
 theorem uncurry_comp_mk : Function.uncurry f ∘ Prod.mk a = f a := by
   rfl
-
 
 theorem flatMap_map_product : (List.flatMap (fun i ↦ List.map (f i) s) t) = List.map (Function.uncurry f) (List.product t s) := by
   rw [List.product.eq_1]
