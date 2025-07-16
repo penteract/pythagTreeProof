@@ -2,7 +2,7 @@ import Mathlib
 import Proof.Eqns
 import Proof.CertProof
 import Proof.TileArea
-import Proof.List
+import Proof.Lemmas.List
 
 theorem volFin {ps : List Piece} : vol ps ≠ ⊤ := by
   apply (ne_top_of_lt (b:=⊤))

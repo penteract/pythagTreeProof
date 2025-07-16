@@ -237,6 +237,7 @@ lemma add_mess {a b c d e f g : ℝ } :
         sorry
 
 
+-- it feels like bound should be able to solve this
 lemma lem {x : ℝ }  (h : 5 / 2 < 2 + x) : 1<2*x := by
   -- bound
   linarith
@@ -263,8 +264,6 @@ theorem thm (x : ℕ ) (h : x>0) :
          | 0 => 2
          | n => 3):= by
   sorry
-
-
 
 
 lemma lemq {x y:ℝ}: (∃ a b, ((3 < a ∧ a < 4) ∧ 0 < b ∧ b < 1) ∧ (a + b + 4) * 0.5 = 4 + x ∧ (b - a + 6) * 0.5 = 1 + y) ∧

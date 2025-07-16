@@ -3,6 +3,7 @@ import Proof.Tiles
 import Proof.SquareDivision
 import Proof.Rotations
 import Proof.Basic
+import Proof.Lemmas.List
 open Set
 
 def getTiles (ps : List Piece) : Set R2 := Multiset.sup (List.map getTile ps)
@@ -37,21 +38,6 @@ lemma ll : getTile hd ⊔ (getTiles tl) ∩ ⇑(corTransform cor) '' usq =
     sorry
 -/
 
-lemma foldr_comm_append [Std.Associative op]  [Std.Commutative op]:
-  (List.foldr (fun x1 x2 ↦ op x1 x2) e (t1++t2))  =
-  (List.foldr (fun x1 x2 ↦ op x1 x2) e (t2++t1)) := by
-    simp only [← Multiset.coe_fold_r]
-    simp only [← Multiset.coe_add]
-    rw [add_comm]
-
-lemma foldy [Std.Associative op]  [Std.Commutative op]:
-  List.foldl (fun x1 x2 ↦ op x1 x2) (List.foldr (fun x1 x2 ↦ op x1 x2) e t1) tt =
-  List.foldr (fun x1 x2 ↦ op x1 x2) (List.foldr (fun x1 x2 ↦ op x1 x2) e tt) t1
-   := by
-    rw [List.foldl_eq_foldr]
-    rw [← List.foldr_append]
-    rw [← List.foldr_append]
-    rw [foldr_comm_append]
 
 theorem pieceMap_makes_pieces {cor : Cor} (ps : List Piece) :
   getTiles ps ∩ (corTransform cor '' usq)
@@ -296,12 +282,6 @@ def canon_rot (ps : List Piece) : List Piece :=
     /- @min _ (minOfLe) (rotList Rot.none ps) (@min _ (minOfLe) (rotList Rot.left ps)
     (@min _ (minOfLe) (rotList Rot.half ps) (@min _ (minOfLe) (rotList Rot.right ps) )) -/
 
-
-lemma foldr_distrib {l:List α } {f : α → α}  {op : α → α → α} (h :∀ a b,  f (op a b) = op (f a) (f b)) : f (List.foldr op e l) = List.foldr (op) (f e) (List.map f l) := by
-  induction l with
-  | nil => simp
-  | cons a b ih =>
-    simp [ih,h]
 
 
 theorem piece30_usq : (getTile ( Piece.treePiece 3 0 r) = usq) := by
