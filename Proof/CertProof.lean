@@ -3,7 +3,7 @@ import Mathlib
 -- This takes about 100 seconds;
 -- I suspect the slow bit is parsing lists, which appears to be quadratic in the length of the list (hence why I've split the list into 100 parts)
 import Proof.Cert
-import Proof.TileArea
+import Proof.TileDefs
 
 import Proof.Eqns
 
@@ -13,13 +13,7 @@ set_option maxRecDepth 200000
 
 
 
-def pyt_eqns : List (List (List Piece × ℚ ) × ℚ)  := allparts.map Eqns.fromAllParts-- (fun (a,b,q) => ((a,4)::b.map (·,-1) ,q) )
--- def pyt_eqns' : List (List (List Piece × ℚ ) × ℚ)  := allparts.map Eqns.fromAllParts
-/-
-def bigMat' : Matrix (allparts.map Eqns.fromAllParts).toFinset
-                    (Eqns.all_vars (allparts.map Eqns.fromAllParts)).toFinset
-                    ℚ := Eqns.getMat (allparts.map Eqns.fromAllParts)
--/
+def pyt_eqns : List (List (List Piece × ℚ ) × ℚ)  := allparts.map Eqns.fromAllParts
 def bigMat : Matrix (pyt_eqns).toFinset
                     (Eqns.all_vars (pyt_eqns)).toFinset
                     ℚ := Eqns.getMat (pyt_eqns)
@@ -30,17 +24,6 @@ def bigMat : Matrix (pyt_eqns).toFinset
 -- that hold for the volume of pieces of the Pythagoras tree
 theorem allParts_describes_pyt : ∀ p ∈ allparts, p.2.1 = List.map (fun r => canon_cor_rot r p.1) [Cor.tl,Cor.br,Cor.bl,Cor.tr] := by
   native_decide
-
-
-/-
--- def hdap := List.head allparts (by simp [allparts,part1])
-def hdap := allparts[1]!
-
-#eval hdap.2.1 = List.map (fun r => canon_cor_rot r hdap.1)  [Cor.tl,Cor.br,Cor.bl,Cor.tr]
-
-#eval hdap.2.1
-#eval List.map (fun r => canon_cor_rot r hdap.1) [Cor.tl,Cor.br,Cor.bl,Cor.tr]
--/
 
 -- verifies in 5 mins. Could probably be made much faster by using hashmaps or something,
             -- I think it's spending most of its time adding 0s
@@ -53,6 +36,7 @@ theorem allParts_makes_eqn :
     (fun v => if v.val=[] then -Eqns.qEmpty else
               if v.val=[Piece.fullPiece] then -Eqns.qFull else
               if v.val ∈ init then 1 else 0 ) := by
+  unfold bigMat pyt_eqns Eqns.fromAllParts
   with_unfolding_all native_decide
 
 

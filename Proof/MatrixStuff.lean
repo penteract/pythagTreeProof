@@ -1,7 +1,7 @@
 import Mathlib
 import Proof.Eqns
 import Proof.CertProof
-import Proof.TileArea
+import Proof.TileAreaOpt
 import Proof.Lemmas.List
 
 theorem volFin {ps : List Piece} : vol ps ≠ ⊤ := by

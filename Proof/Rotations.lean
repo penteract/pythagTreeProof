@@ -18,10 +18,9 @@ noncomputable def rotLeft : R2 ≃ₗ[ℝ] R2 := by
   have hmrml : mr*ml = 1 := by
     simp [ml,mr, Matrix.mul_fin_two, Matrix.one_fin_two]
   exact Matrix.toLinOfInv (Basis.finTwoProd _) (Basis.finTwoProd _) hmlmr hmrml
-  -- exact (Matrix.toLinearEquiv (Basis.finTwoProd _) m h)
 
 
-macro "Rot" : term => `(ZMod 4)
+macro "Rot" : term => `(ZMod 4) -- reducible def might have been the right way to do this
 -- def Rot := ZMod 4
 /- Could define it like this, but proving that it's a group is a waste of time
 inductive Rot : Type where
@@ -35,13 +34,6 @@ def Rot.none : Rot := 0
 def Rot.left : Rot := 1
 def Rot.half : Rot := 2
 def Rot.right : Rot := 3
-
--- def rinv (r:Rot): Rot := -r
-/- match r with
-  | Rot.left => Rot.right
-  | Rot.right => Rot.left
-  | _ => r
--/
 
 -- @[simp]
 -- noncomputable def conj (a b : R2 ≃ᵃ[ℝ] R2) := AffineEquiv.trans (AffineEquiv.trans b.symm a) b
@@ -66,22 +58,6 @@ noncomputable def rotTransform (rot : Rot) : (R2 ≃ᵃ[ℝ] R2) := match rot wi
   | 2 => AffineEquiv.homothetyUnitsMulHom ⟨1/2,1/2⟩ (-1)
   | 3 => conj rotLeft.symm.toAffineEquiv (AffineIsometryEquiv.constVAdd ℝ R2 (1/2,1/2)).toAffineEquiv
 
-
-
--- theorem rinv_consistent : rotTransform r (rotTransform (rinv r) x) = x := by
---   obtain ⟨x,y⟩ := x
---   cases' r <;>(
---     unfold rotTransform rinv
---     simp
---     )
---   . unfold rotLeft
---     simp [AffineIsometryEquiv.constVAdd, AffineIsometryEquiv.symm]
---   . unfold homothety
---     simp
---   unfold rotLeft
---   simp [AffineIsometryEquiv.constVAdd,AffineIsometryEquiv.symm]
-
-
 theorem thm_rot {rot:Rot}: rotTransform rot '' usq = usq := by
   have h (b:ℝ ) (z:ℝ) : 2⁻¹ + (-b + 2⁻¹) = z ↔ b = 1-z := by
     norm_num
@@ -105,37 +81,7 @@ theorem thm_rot {rot:Rot}: rotTransform rot '' usq = usq := by
     simp [rotLeft,AffineIsometryEquiv.constVAdd]
     simp [← and_assoc,h]
     bound
-/-
-@[simp]
-def lefts : Rot ≃ Fin 4 where
-  toFun := fun r => match r with
-    | Rot.none => 0
-    | Rot.left => 1
-    | Rot.half => 2
-    | Rot.right => 3
-  invFun := fun n => match n with
-    | 0 => Rot.none
-    | 1 => Rot.left
-    | 2 => Rot.half
-    | 3 => Rot.right
-  left_inv := by
-    intro r
-    cases r <;> rfl
-  right_inv := by
-    intro r
-    fin_cases r <;> rfl
 
-def fromLefts (n : Fin 4) : Rot := match n with
-  | 0 => Rot.none
-  | 1 => Rot.none
-  | 2 => Rot.none
-  | 3 => Rot.none
--/
--- lemma coe_toAffineEquiv_symm {k : Type u_1} {V₁ : Type u_6} {V₂ : Type u_7} [Ring k] [AddCommGroup V₁]
---          [AddCommGroup V₂] [Module k V₁] [Module k V₂]
---     (e : V₁ ≃ₗ[k] V₂)
---      : (e.toAffineEquiv).symm = (e.symm : V₂ → V₁) :=
---   rfl
 theorem rotIsRotation (r : Rot):
   rotTransform r =
     conj (conj (rotation (Circle.exp (π * (r.val : ℝ ) / 2))).toAffineEquiv Complex.equivRealProdLm.toAffineEquiv) (AffineIsometryEquiv.constVAdd ℝ R2 (1/2,1/2)).toAffineEquiv := by
@@ -155,13 +101,6 @@ theorem rotIsRotation (r : Rot):
     zero_div, Circle.exp_zero, map_one, AffineEquiv.trans_apply, AffineIsometryEquiv.coe_toAffineEquiv,
     LinearEquiv.coe_toAffineEquiv, LinearIsometryEquiv.coe_toLinearEquiv, LinearIsometryEquiv.coe_one, id_eq,
     AffineEquiv.apply_symm_apply, AffineIsometryEquiv.apply_symm_apply]
-  /-simp_all only [Fin.isValue, rotTransform, AffineEquiv.refl_apply, conj, one_div,
-    AffineIsometryEquiv.toAffineEquiv_symm, Fin.val_zero, CharP.cast_eq_zero, mul_zero,
-    zero_div, Circle.exp_zero, _root_.map_one, AffineEquiv.trans_apply, AffineIsometryEquiv.coe_toAffineEquiv,
-    LinearEquiv.coe_toAffineEquiv, LinearIsometryEquiv.coe_toLinearEquiv, LinearIsometryEquiv.coe_one, id_eq,
-    AffineEquiv.apply_symm_apply, AffineIsometryEquiv.apply_symm_apply]
-  -/
-  --simp only
   ext ⟨x,y⟩ <;> (
     simp only [ZMod.val]
     simp [rotLeft,AffineIsometryEquiv.constVAdd]
@@ -183,40 +122,7 @@ theorem rotIsRotation (r : Rot):
   )
 
 
-def rotCor (r : Rot) (c : Cor) : Cor := match r with
-  | 0 => c
-  | 1 => match c with
-    | Cor.bl => Cor.br
-    | Cor.br => Cor.tr
-    | Cor.tr => Cor.tl
-    | Cor.tl => Cor.bl
-  | 2 => match c with
-    | Cor.bl => Cor.tr
-    | Cor.br => Cor.tl
-    | Cor.tr => Cor.bl
-    | Cor.tl => Cor.br
-  | 3 => match c with
-    | Cor.bl => Cor.tl
-    | Cor.br => Cor.bl
-    | Cor.tr => Cor.br
-    | Cor.tl => Cor.tr
 
--- def rotRot (r:Rot) (r':Rot) : Rot := lefts.symm (lefts r + lefts r')
-
-
-/-
-lemma lll : (5 : ℝ)  % (2.1 :ℝ ) = (0:ℝ ) := by
-  sorry
-
-
-lemma l (a b : ℝ ) : a * 2⁻¹ + b * 2⁻¹ ≡ (a + b) % 4 * 2⁻¹ [PMOD 2] := by
-  rw [← right_distrib]
-  simp_all only [ne_eq, inv_eq_zero, OfNat.ofNat_ne_zero, not_false_eq_true,
-  AddCommGroup.mul_modEq_mul_right,
-    div_inv_eq_mul]
-  simp [AddComGroup.ModEq]
-  sorry
--/
 lemma lemFinSumZMod (n : Nat) (a b : Fin n): a + b ≡ (a + b : Fin n) [ZMOD n] := by
   rw [Lean.Omega.Fin.ofNat_val_add]
   rw [Int.ModEq.eq_1]
@@ -244,7 +150,6 @@ theorem cexp (a b:Fin 4 ) : (Circle.exp (π * ((a + b : Fin 4)) / 2 )) = Circle.
       symm
       exact (Nat.mod_mod_of_dvd _ (dvd_refl 4))
 
--- lemma aff_e (a b : P₁ ≃ᵃ[k] P₂): a=b ↔ (a:P_\) = b
 
 theorem rotTransform_hom (r:Rot) (r':Rot) : rotTransform (r + r') = AffineEquiv.trans (rotTransform r)  (rotTransform r') := by
   rw [rotIsRotation]
@@ -264,17 +169,8 @@ theorem rotTransform_hom (r:Rot) (r':Rot) : rotTransform (r + r') = AffineEquiv.
   nth_rw 2 [mul_comm]
   rw [Submonoid.coe_mul,mul_assoc]
 
-theorem rotCor_hom (r:Rot) (r':Rot) : rotCor (r + r') = rotCor r ∘ rotCor r' := by
-  ext c
-  fin_cases r <;>  fin_cases r' <;> cases c <;> decide
 
-/-theorem rotRot_assoc (r1 r2 r3) : rotRot r1 (rotRot r2 r3) = rotRot (rotRot r1 r2) r3 := by
-  cases r1 <;> cases r2 <;> cases r3 <;> simp [rotRot]-/
-
-/-
-theorem rcor_consistent {rot : Rot} {cor : Cor} :
-  rotTransform rot '' (corTransform cor '' usq) = corTransform (rcor rot cor) '' usq := by
-  sorry-/
+-- rotations don't affect measure
 
 theorem t314 : (3:ZMod 4) + 1 = 0 := by
   rfl
@@ -285,13 +181,6 @@ lemma lvol {s : Set (ℝ ×ℝ) } : volume ((fun (a:ℝ×ℝ) ↦         (2⁻�
 lemma add_stuff [Add α ] {a:α } : (fun x => a + f x) = (fun x => a+x) ∘ f := by
   ext x
   simp
-lemma stuff_add {α} [Add α ] {f : α→α} {a:α } : (fun x => f (a+x)) = f ∘ (fun x => a+x) := by
-  ext x
-  simp
-
-
-lemma lfun (f : α → α ) : f = fun x => f x := by
-  rfl
 
 theorem rot_vol_l : MeasureTheory.volume s = MeasureTheory.volume (rotTransform Rot.left '' s) := by
   simp only [rotTransform, «Rot».left, conj, one_div, AffineIsometryEquiv.toAffineEquiv_symm,
@@ -303,16 +192,12 @@ theorem rot_vol_l : MeasureTheory.volume s = MeasureTheory.volume (rotTransform 
     neg_mk, AffineIsometryEquiv.coe_mk, AffineEquiv.constVAdd_apply, vadd_eq_add, map_add]
   rw [add_stuff,Set.image_comp]
   simp only [Set.image_add_left, neg_mk, measure_preimage_add]
-
-  rw [lfun (DFunLike.coe rotLeft)]
   unfold rotLeft
   simp only [toLinOfInv_apply]
   rw [MeasureTheory.Measure.addHaar_image_linearMap]
   simp
 
 
-
---  Real.map_linearMap_volume_pi_eq_smul_volume_pi
 theorem rot_vol : MeasureTheory.volume s = MeasureTheory.volume (rotTransform r '' s) := by
   fin_cases r
   simp only [rotTransform, AffineEquiv.refl_apply, Set.image_id']
@@ -323,29 +208,91 @@ theorem rot_vol : MeasureTheory.volume s = MeasureTheory.volume (rotTransform r 
   rw [← AffineEquiv.coe_trans]
   rw [← rotTransform_hom]
   simp [Rot.left,t314]
-  /-
-  rw [rotIsRotation]
-  unfold conj
-  --simp? [-rotation_apply]
-  simp? [-rotation_apply,-Complex.equivRealProdLm_apply,AffineIsometryEquiv.constVAdd]
-  rw [add_stuff,Set.image_comp]
-  rw [lvol]
-  rw [@stuff_add _ _ (fun a ↦
-        Complex.equivRealProdLm
-          ((rotation (Circle.exp (π * r.cast / 2))) (Complex.equivRealProdLm.toAffineEquiv.symm a))) (-2⁻¹, -2⁻¹)]
-  rw [Set.image_comp]
-  --rw [lvol]
-  --rw [measure_preimage_add]
-  rw [Set.image_add_left, neg_mk, measure_preimage_add]
 
-  have h := MeasureTheory.measurePreserving_add_left
-  simp only [one_div, AffineIsometryEquiv.toAffineEquiv_symm, ZMod.natCast_val,
-    AffineEquiv.trans_apply, AffineIsometryEquiv.coe_toAffineEquiv, LinearEquiv.coe_toAffineEquiv,
-    LinearIsometryEquiv.coe_toLinearEquiv, Complex.equivRealProdLm_apply,
-    AffineIsometryEquiv.coe_constVAdd, vadd_eq_add, mk_add_mk]
-  simp only [one_div, AffineIsometryEquiv.toAffineEquiv_symm, ZMod.natCast_val,
-    AffineEquiv.trans_apply, AffineIsometryEquiv.coe_toAffineEquiv, LinearEquiv.coe_toAffineEquiv,
-    LinearIsometryEquiv.coe_toLinearEquiv, rotation_apply, Circle.coe_exp, Complex.ofReal_div,
-    Complex.ofReal_mul, Complex.ofReal_ofNat, Complex.equivRealProdLm_apply, Complex.mul_re,
-    Complex.mul_im, AffineIsometryEquiv.coe_constVAdd, vadd_eq_add, mk_add_mk]
--/
+
+-- Corners stuff
+
+def rotCor (r : Rot) (c : Cor) : Cor := match r with
+  | 0 => c
+  | 1 => match c with
+    | Cor.bl => Cor.br
+    | Cor.br => Cor.tr
+    | Cor.tr => Cor.tl
+    | Cor.tl => Cor.bl
+  | 2 => match c with
+    | Cor.bl => Cor.tr
+    | Cor.br => Cor.tl
+    | Cor.tr => Cor.bl
+    | Cor.tl => Cor.br
+  | 3 => match c with
+    | Cor.bl => Cor.tl
+    | Cor.br => Cor.bl
+    | Cor.tr => Cor.br
+    | Cor.tl => Cor.tr
+
+theorem rotCor_hom (r:Rot) (r':Rot) : rotCor (r + r') = rotCor r ∘ rotCor r' := by
+  ext c
+  fin_cases r <;>  fin_cases r' <;> cases c <;> decide
+
+theorem corT_comp_rotT {cor rr} :
+  ⇑(corTransform cor) ∘ ⇑(rotTransform rr)  =
+    ⇑(rotTransform rr) ∘ ⇑(corTransform (rotCor (-rr) cor)) := by
+  fin_cases rr
+  . fin_cases cor <;> simp [rotCor]
+  . fin_cases cor <;> (
+      simp only  [rotCor]
+      ext ⟨x,y⟩ <;>
+        simp only [corTransform, one_div, LinearMap.coe_toAffineMap, rotTransform, conj,
+          AffineIsometryEquiv.constVAdd, AffineEquiv.constVAdd_symm, Prod.neg_mk, rotLeft,
+          AffineEquiv.coe_trans, LinearEquiv.coe_toAffineEquiv, Function.comp_apply,
+          AffineEquiv.constVAdd_apply, vadd_eq_add, Prod.mk_add_mk, Matrix.toLinOfInv_apply,
+          Matrix.toLin_finTwoProd_apply, zero_mul, neg_mul, one_mul, neg_add_rev, neg_neg, zero_add,
+          add_zero, add_neg_cancel_left, LinearMap.smul_apply, LinearMap.id_coe, id_eq, Prod.smul_mk,
+          smul_eq_mul, AffineMap.coe_add, AffineMap.coe_const, Pi.add_apply, Function.const_apply,
+          neg_add_cancel_comm_assoc] <;> linarith
+      -- simp [rotCor, AffineIsometryEquiv.constVAdd,rotLeft,corTransform]
+    )
+  . fin_cases cor <;>(
+      simp only [rotCor]
+      ext ⟨x,y⟩ <;> (
+        -- simp [corTransform, homothety]
+        simp only [corTransform, one_div, LinearMap.coe_toAffineMap, rotTransform,
+          AffineEquiv.coe_homothetyUnitsMulHom_apply, AffineMap.homothety, Units.val_neg,
+          Units.val_one, vsub_eq_sub, neg_smul, one_smul, neg_sub, vadd_eq_add, AffineMap.coe_add,
+          AffineMap.coe_sub, AffineMap.coe_const, AffineMap.coe_id, Function.comp_apply, Pi.add_apply,
+          Pi.sub_apply, Function.const_apply, id_eq, Prod.mk_sub_mk, Prod.mk_add_mk,
+          LinearMap.smul_apply, LinearMap.id_coe, Prod.smul_mk, smul_eq_mul, sub_add_cancel_right]
+        linarith)
+    )
+  . fin_cases cor <;>(
+      simp only [rotCor]
+      ext ⟨x,y⟩ <;>
+        -- simp? [corTransform,AffineIsometryEquiv.constVAdd,rotLeft]
+        simp only [corTransform, one_div, LinearMap.coe_toAffineMap, rotTransform, conj,
+          AffineIsometryEquiv.constVAdd, AffineEquiv.constVAdd_symm, Prod.neg_mk, rotLeft,
+          AffineEquiv.coe_trans, LinearEquiv.coe_toAffineEquiv, Function.comp_apply,
+          AffineEquiv.constVAdd_apply, vadd_eq_add, Prod.mk_add_mk, Matrix.toLinOfInv_symm_apply,
+          Matrix.toLin_finTwoProd_apply, zero_mul, one_mul, zero_add, neg_mul, neg_add_rev, neg_neg,
+          add_zero, add_neg_cancel_left, LinearMap.smul_apply, LinearMap.id_coe, id_eq, Prod.smul_mk,
+          smul_eq_mul, AffineMap.coe_add, AffineMap.coe_const, Pi.add_apply, Function.const_apply,
+          neg_add_cancel_comm_assoc] <;> linarith
+    )
+
+theorem corT_rotT_image {cor rr} :
+  ⇑(corTransform cor) '' (⇑(rotTransform rr) '' s)   =
+    ⇑(rotTransform rr) '' (⇑(corTransform (rotCor (-rr) cor)) '' s) := by
+  rw [← Set.image_comp, corT_comp_rotT,Set.image_comp]
+
+
+theorem rotT_inter_corsq :
+   ⇑(rotTransform rr) '' s ∩ ⇑(corTransform cor) '' usq = ⇑(rotTransform rr) '' (s  ∩ (corTransform (rotCor (-rr) cor) '' usq))
+    := by
+  rw [Set.image_inter (EquivLike.injective _)]
+  rw [← corT_rotT_image]
+  rw [thm_rot]
+
+theorem rot_inter_usq :
+    rotTransform r '' (s ∩ usq)
+    = rotTransform r '' s ∩ usq := by
+    rw [Set.image_inter (EquivLike.injective _)]
+    rw [thm_rot]

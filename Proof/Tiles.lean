@@ -2,23 +2,7 @@ import Mathlib
 import Proof.SquareDivision
 import Proof.Pieces
 import Proof.PythagTree
--- def Piece : Type := sorry
-
--- def pythagTree : Set (ℝ × ℝ) := sorry
-def triangle : Set (ℝ×ℝ) := {⟨x,y⟩  | 0<x ∧ 0<y ∧  x+y<1}
-
-def getTile (p :Piece) : Set R2 := match p with
-  | .treePiece x y r => rotTransform r ''
-      ((AffineEquiv.constVAdd ℝ (ℝ×ℝ) ⟨-x, -y⟩ '' pythagTree) ∩ usq)
-  | .trianglePiece r => rotTransform r '' triangle
-  | .fullPiece => usq
-  | .emptyPiece => ∅
-
--- triangle stuff
-
-/-
-lemma lem : f = fun x => f x := by
-  simp_all only -/
+import Proof.TileDefs
 
 lemma tri_in_sq : triangle ⊆ usq := by
   unfold triangle usq square
@@ -44,113 +28,8 @@ theorem triMap_makes_tri (cor : Cor): triangle ∩ (corTransform cor '' usq) = (
     )
   )
 
-def grid := Fin 7 × Fin 4
 
-def sqr (c : grid): Set R2 := square ⟨c.1,c.2⟩  1
-
-
--- def tile p := pythagTree ∩ (sqr p)
-def gridPiece (c:grid) : Piece := .treePiece c.1 c.2 Rot.none
-
-
--- def getCors (p: Piece) (c: Cor) : Set Piece :=
---   sorry
-
-lemma sq_add (dx dy : ℝ ):
-  (fun x ↦ (dx, dy) + x) ⁻¹' square (dx,dy) 1 = square (0, 0) 1 := by
-  ext ⟨x,y⟩
-  simp [square]
-
-def getTileIsInter (c : grid):
-  getTile (gridPiece c) =
-  AffineEquiv.constVAdd ℝ (ℝ×ℝ) ⟨-c.1, -c.2⟩ '' (pythagTree ∩ (sqr c)) := by
-  simp only [getTile, gridPiece]
-  simp [Rot.none,sqr,usq]
-  rw [sq_add]
-
-/- An alternative definition of getTile would have the following property
-theorem getTileIsInter' (c : grid): getTile (gridPiece c) = pythagTree ∩ (sqr c) := by
-  have x:pythagTree := by
-    sorry
-  obtain ⟨ ⟨a,b⟩,h⟩ := x
-  sorry
--/
--- def pieceMap (p : Piece) (cor : Cor) : List (Piece) := sorry
-
-
-lemma cor_sq_ss (cor : Cor) : (corTransform cor) '' usq ⊆ usq := by
-  cases' cor <;>(
-    simp [corTransform,usq,square]
-    intro ⟨x,y⟩
-    simp
-    norm_num
-    bound
-  )
-
-theorem corT_comp_rotT {cor rr} :
-  ⇑(corTransform cor) ∘ ⇑(rotTransform rr)  =
-    ⇑(rotTransform rr) ∘ ⇑(corTransform (rotCor (-rr) cor)) := by
-  fin_cases rr
-  . fin_cases cor <;> simp [rotCor]
-  . fin_cases cor <;> (
-      simp only  [rotCor]
-      ext ⟨x,y⟩ <;>
-        simp only [corTransform, one_div, LinearMap.coe_toAffineMap, rotTransform, conj,
-          AffineIsometryEquiv.constVAdd, AffineEquiv.constVAdd_symm, Prod.neg_mk, rotLeft,
-          AffineEquiv.coe_trans, LinearEquiv.coe_toAffineEquiv, Function.comp_apply,
-          AffineEquiv.constVAdd_apply, vadd_eq_add, Prod.mk_add_mk, Matrix.toLinOfInv_apply,
-          Matrix.toLin_finTwoProd_apply, zero_mul, neg_mul, one_mul, neg_add_rev, neg_neg, zero_add,
-          add_zero, add_neg_cancel_left, LinearMap.smul_apply, LinearMap.id_coe, id_eq, Prod.smul_mk,
-          smul_eq_mul, AffineMap.coe_add, AffineMap.coe_const, Pi.add_apply, Function.const_apply,
-          neg_add_cancel_comm_assoc] <;> linarith
-      -- simp [rotCor, AffineIsometryEquiv.constVAdd,rotLeft,corTransform]
-    )
-  . fin_cases cor <;>(
-      simp only [rotCor]
-      ext ⟨x,y⟩ <;> (
-        -- simp [corTransform, homothety]
-        simp only [corTransform, one_div, LinearMap.coe_toAffineMap, rotTransform,
-          AffineEquiv.coe_homothetyUnitsMulHom_apply, AffineMap.homothety, Units.val_neg,
-          Units.val_one, vsub_eq_sub, neg_smul, one_smul, neg_sub, vadd_eq_add, AffineMap.coe_add,
-          AffineMap.coe_sub, AffineMap.coe_const, AffineMap.coe_id, Function.comp_apply, Pi.add_apply,
-          Pi.sub_apply, Function.const_apply, id_eq, Prod.mk_sub_mk, Prod.mk_add_mk,
-          LinearMap.smul_apply, LinearMap.id_coe, Prod.smul_mk, smul_eq_mul, sub_add_cancel_right]
-        linarith)
-    )
-  . fin_cases cor <;>(
-      simp only [rotCor]
-      ext ⟨x,y⟩ <;>
-        -- simp? [corTransform,AffineIsometryEquiv.constVAdd,rotLeft]
-        simp only [corTransform, one_div, LinearMap.coe_toAffineMap, rotTransform, conj,
-          AffineIsometryEquiv.constVAdd, AffineEquiv.constVAdd_symm, Prod.neg_mk, rotLeft,
-          AffineEquiv.coe_trans, LinearEquiv.coe_toAffineEquiv, Function.comp_apply,
-          AffineEquiv.constVAdd_apply, vadd_eq_add, Prod.mk_add_mk, Matrix.toLinOfInv_symm_apply,
-          Matrix.toLin_finTwoProd_apply, zero_mul, one_mul, zero_add, neg_mul, neg_add_rev, neg_neg,
-          add_zero, add_neg_cancel_left, LinearMap.smul_apply, LinearMap.id_coe, id_eq, Prod.smul_mk,
-          smul_eq_mul, AffineMap.coe_add, AffineMap.coe_const, Pi.add_apply, Function.const_apply,
-          neg_add_cancel_comm_assoc] <;> linarith
-    )
-theorem corT_rotT_image {cor rr} :
-  ⇑(corTransform cor) '' (⇑(rotTransform rr) '' s)   =
-    ⇑(rotTransform rr) '' (⇑(corTransform (rotCor (-rr) cor)) '' s) := by
-  rw [← Set.image_comp, corT_comp_rotT,Set.image_comp]
-      -- linarith
-
-
-theorem rotT_inter_corsq :
-   ⇑(rotTransform rr) '' s ∩ ⇑(corTransform cor) '' usq = ⇑(rotTransform rr) '' (s  ∩ (corTransform (rotCor (-rr) cor) '' usq))
-    := by
-  rw [Set.image_inter (EquivLike.injective _)]
-  rw [← corT_rotT_image]
-  rw [thm_rot]
-
-theorem rot_inter_usq :
-    rotTransform r '' (s ∩ usq)
-    = rotTransform r '' s ∩ usq := by
-    rw [Set.image_inter (EquivLike.injective _)]
-    rw [thm_rot]
 open Set
-
 
 @[simp] theorem val_three {n : Nat} : (3 : Fin (n + 4)).val = 3 := rfl
 
@@ -181,15 +60,11 @@ theorem pyt_is_union : pythagTree = Ioo 3 4 ×ˢ Ioo 0 1
       nth_rw 1 [← OrderHom.map_lfp]
     _ = treeFun_m (treeFun_m pythagTree) := by
       rw [← pythagTree]
-    --_ = OrderHom.lfp (treeFun_m.comp treeFun_m) := (lfp_f_eq_lfp_ff _)
     _ = _ := by
       simp only [treeFun_m,OrderHom.coe_mk,treeFun]
       simp only [Set.image_union]
-      --simp only [Set.union_assoc, Set.union_comm]
       simp [-d0, -d1, Set.union_assoc, ← Set.union_comm]
       exact union_mess
-
-      -- aesop?
 
 theorem d00_pyt_in_rect : d0 '' (d0 '' pythagTree) ⊆ Ioo 0.5 2.5 ×ˢ Ioo 0 3.5 := by
   intro ⟨x,y⟩
@@ -1114,7 +989,7 @@ theorem treeMap_makes_piece (cx : Fin 7) (cy : Fin 4) (cor : Cor):
   rw [AffineEquiv.coe_refl,Set.image_id]
   rw [Set.inter_comm]
   rw [Set.inter_assoc]
-  rw [Set.inter_eq_self_of_subset_right (cor_sq_ss cor)]
+  rw [Set.inter_eq_self_of_subset_right cor_sq_ss]
   unfold treeMap
   by_cases h : (cx=3 ∧ cy=0)
   . simp only [if_pos h]
@@ -1123,7 +998,7 @@ theorem treeMap_makes_piece (cx : Fin 7) (cy : Fin 4) (cor : Cor):
        Prod.neg_mk, neg_neg,  Prod.mk_add_mk, zero_add,
        List.map_cons, List.map_nil, Multiset.coe_singleton, Multiset.sup_singleton,getTile]
     rw [Set.inter_eq_right]
-    apply subset_trans (cor_sq_ss cor)
+    apply subset_trans cor_sq_ss
     apply (subset_trans _ (Set.monotone_image sq_ss_pyt))
     simp [usq,square]
     intro ⟨x,y⟩
@@ -1222,7 +1097,7 @@ theorem pieceMap_makes_piece (p : Piece) (cor : Cor):
       simp only [getTile, pieceMap, List.map_cons, List.map_nil, Multiset.coe_singleton,
                  Multiset.sup_singleton, inter_eq_right, image_subset_iff]
       rw [← Set.image_subset_iff]
-      exact cor_ss_sq
+      exact cor_sq_ss
     | .emptyPiece =>
       simp [getTile, pieceMap]
     | .trianglePiece rr =>
@@ -1236,7 +1111,7 @@ theorem pieceMap_makes_piece (p : Piece) (cor : Cor):
       nth_rw 1 [getTile]
       rw [rot_inter_usq]
       rw [inter_assoc]
-      rw [Set.inter_eq_self_of_subset_right cor_ss_sq]
+      rw [Set.inter_eq_self_of_subset_right cor_sq_ss]
       rw [rotT_inter_corsq]
       have h := treeMap_makes_piece
       simp only [pieceMap]
@@ -1249,4 +1124,4 @@ theorem pieceMap_makes_piece (p : Piece) (cor : Cor):
       rw [inter_comm]
       nth_rw 3 [inter_comm]
       rw [← inter_assoc]
-      rw [Set.inter_eq_self_of_subset_left cor_ss_sq]
+      rw [Set.inter_eq_self_of_subset_left cor_sq_ss]

@@ -11,12 +11,12 @@ open Set
 
 macro "R2" : term => `(ℝ × ℝ)
 
-
+@[reducible]
 def rect (c : ℝ × ℝ ) (w:ℝ) (h : ℝ) := Ioo c.1 (c.1+w) ×ˢ Ioo c.2 (c.2+h)
 
 def square (c :ℝ×ℝ) (sz : NNReal) := Ioo c.1 (c.1+sz) ×ˢ Ioo c.2 (c.2+sz)
 
-def usq : Set (ℝ×ℝ)  := square ⟨0, 0⟩ 1
+def usq : Set (ℝ×ℝ)  := square ⟨0, 0⟩ 1 -- unit square
 
 def irect (n : ℕ ) (m : ℕ) : Type := (Fin n × Fin m)
 
@@ -67,7 +67,7 @@ inductive Cor : Type where
 
 instance Cor.fintype : Fintype Cor := ⟨ ⟨ {bl,br,tl,tr}, by simp⟩ , fun x => by cases x <;> simp⟩
 
--- Tranformation (scale and translate) sending unit_sq to a corner of unitsq
+-- Transformation (scale and translate) sending unit_sq to a corner of unitsq
 noncomputable def corTransform (cor : Cor) : (R2 →ᵃ[ℝ] R2) := match cor with
   | Cor.bl => LinearMap.toAffineMap ((1/2 : ℝ ) • LinearMap.id)
   | Cor.br => LinearMap.toAffineMap ((1/2 : ℝ ) • LinearMap.id)
@@ -101,23 +101,6 @@ theorem vol_rect (zlew : 0≤ w): MeasureTheory.volume (rect p w h) = ENNReal.of
   rw [volume_Ioo,volume_Ioo]
   simp [ENNReal.ofReal_mul zlew]
 
-/-
-theorem corners_disj : Pairwise (Disjoint on (λ c:Cor => corTransform c '' unit_sq ) ) := sorry
--/
-/-
-
--- inductive Piece : Type
-  | triangle :  Piece -- triangle is bottom left half of unit_sq
-  | emptyPiece : Piece
-  | fullPiece : Piece
-
-def pieces (s : Z2) (cor : Cor) : List (Piece) := sorry
-
-def triangleMap (cor:Cor) : Piece := match cor with
-  | Cor.bl => Piece.fullPiece
-  | Cor.tr => Piece.emptyPiece
-  | _ => Piece.triangle -/
-
 
 theorem corTransform_homothety (i: Cor) : corTransform i = AffineMap.homothety (2 * (corTransform i (0,0))) (1/2 : ℝ ) := by
   cases i <;> (
@@ -147,19 +130,6 @@ theorem corTransform_homothety (i: Cor) : corTransform i = AffineMap.homothety (
       bound
     )
 
-
--- Ioo (0:ℝ) 1 ×ˢ Ioo (0:ℝ) 1
--- def unit_sq : Set (ℝ × ℝ) := {⟨ x , y ⟩ | 0 < x ∧ x < 1 ∧ 0 < y ∧ y < 1 }
-/-
-
-theorem unit_sq_eq_usq : unit_sq = usq := by
-  ext ⟨x,y⟩
-  unfold unit_sq
-  unfold usq
-  unfold square
-  simp_all only [mem_setOf_eq, NNReal.coe_one, zero_add, mem_prod, mem_Ioo]
-  bound
--/
 theorem vol_sq {c : ℝ×ℝ } {sz : NNReal} : volume (square c sz) = Real.toNNReal (sz*sz) := by
   unfold square
   unfold volume
@@ -168,6 +138,10 @@ theorem vol_sq {c : ℝ×ℝ } {sz : NNReal} : volume (square c sz) = Real.toNNR
   rw [volume_Ioo,volume_Ioo]
   simp
   rw [←NNReal.coe_mul,←ENNReal.coe_mul, Real.toNNReal_coe]
+
+theorem usq_measurable : MeasurableSet usq := by
+  unfold usq square
+  exact MeasurableSet.prod measurableSet_Ioo measurableSet_Ioo
 
 theorem vol_usq: volume usq = 1 := by
   unfold usq
@@ -229,8 +203,6 @@ theorem vol_quater {x: Set R2} {cor : Cor} : MeasureTheory.volume (corTransform 
 theorem cor_disj : Pairwise (Function.onFun Disjoint (fun i ↦ ⇑(corTransform i) '' usq)) := by
   intro i j
   intro h
-  --apply Set.disjoint_iff_inter_eq_empty.mpr
-  --simp
   unfold usq
   simp [sq_cors]
   cases' i <;>
@@ -256,21 +228,10 @@ theorem cor_disj : Pairwise (Function.onFun Disjoint (fun i ↦ ⇑(corTransform
     )
 
 
-theorem cor_ss_sq {i:Cor} : corTransform i '' usq ⊆  usq := by
-  --simp
-  -- intro i
-  --rw [← image_subset_iff]
-  unfold usq
-  rw [sq_cors]
-  cases i <;>(
-    simp [corTransform, square]
-    try (
-      rw [prod_subset_prod_iff]
-      apply Or.inl
-      apply And.intro
-    )
-  )<;>(
-    intro x
+theorem cor_sq_ss {cor:Cor} : corTransform cor '' usq ⊆  usq := by
+  cases' cor <;>(
+    simp [corTransform,usq,square]
+    intro ⟨x,y⟩
     simp
     norm_num
     bound
