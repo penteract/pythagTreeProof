@@ -74,7 +74,7 @@ theorem thm_rot {rot:Rot}: rotTransform rot '' usq = usq := by
     simp [← and_assoc,h]
     bound
   . unfold usq square
-    simp [AffineIsometryEquiv.constVAdd,homothety]
+    simp [homothety]
     simp [← and_assoc,h']
     bound
   . unfold usq square
@@ -92,15 +92,15 @@ theorem rotIsRotation (r : Rot):
   ext ⟨x,y⟩
   -- aesop_unfold
   simp_all only [rotTransform, AffineEquiv.refl_apply, conj, one_div,
-    AffineIsometryEquiv.toAffineEquiv_symm, Nat.reduceAdd, Fin.zero_eta, ZMod.val_zero, CharP.cast_eq_zero, mul_zero,
-    zero_div, Circle.exp_zero, map_one, AffineEquiv.trans_apply, AffineIsometryEquiv.coe_toAffineEquiv,
+    Nat.reduceAdd, Fin.zero_eta, ZMod.val_zero, CharP.cast_eq_zero, mul_zero,
+    zero_div, Circle.exp_zero, map_one, AffineEquiv.trans_apply,
     LinearEquiv.coe_toAffineEquiv, LinearIsometryEquiv.coe_toLinearEquiv, LinearIsometryEquiv.coe_one, id_eq,
-    AffineEquiv.apply_symm_apply, AffineIsometryEquiv.apply_symm_apply]
+    AffineEquiv.apply_symm_apply]
   simp_all only [ rotTransform, AffineEquiv.refl_apply, conj, one_div,
-    AffineIsometryEquiv.toAffineEquiv_symm, Nat.reduceAdd, Fin.zero_eta, ZMod.val_zero, CharP.cast_eq_zero, mul_zero,
-    zero_div, Circle.exp_zero, map_one, AffineEquiv.trans_apply, AffineIsometryEquiv.coe_toAffineEquiv,
+     Nat.reduceAdd, Fin.zero_eta, ZMod.val_zero, CharP.cast_eq_zero, mul_zero,
+    zero_div, Circle.exp_zero, map_one, AffineEquiv.trans_apply,
     LinearEquiv.coe_toAffineEquiv, LinearIsometryEquiv.coe_toLinearEquiv, LinearIsometryEquiv.coe_one, id_eq,
-    AffineEquiv.apply_symm_apply, AffineIsometryEquiv.apply_symm_apply]
+    AffineEquiv.apply_symm_apply]
   ext ⟨x,y⟩ <;> (
     simp only [ZMod.val]
     simp [rotLeft,AffineIsometryEquiv.constVAdd]
@@ -144,7 +144,7 @@ theorem cexp (a b:Fin 4 ) : (Circle.exp (π * ((a + b : Fin 4)) / 2 )) = Circle.
         simp_all
       rw [h']
       have h'' : (4:ℝ) = (4:ℕ) := by simp
-      rw [h'',← Lean.Grind.CommRing.natCast_add]
+      rw [h'',←  Lean.Grind.Semiring.natCast_add]
       apply AddCommGroup.ModEq.natCast
       rw [Fin.val_add, Nat.ModEq.eq_1]
       symm

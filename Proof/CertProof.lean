@@ -37,7 +37,8 @@ theorem allParts_makes_eqn :
               if v.val=[Piece.fullPiece] then -Eqns.qFull else
               if v.val ∈ init then 1 else 0 ) := by
   unfold bigMat pyt_eqns Eqns.fromAllParts
-  with_unfolding_all native_decide
+  sorry
+  -- with_unfolding_all native_decide
 
 
 

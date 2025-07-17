@@ -59,7 +59,7 @@ def treeMap (xn : Fin 7) (yn : Fin 4) (cor : Cor) : List Piece :=
     | .br => [trianglePiece Rot.half]
   ) else List.flatMap (fun ⟨(⟨x,y⟩ : ℤ ×ℤ) ,r⟩ =>
      if 0≤x ∧ x<7 ∧ 0≤y ∧ y<4
-        then [treePiece (Fin.ofNat' 7 (Int.toNat x)) (Fin.ofNat' 4 (Int.toNat y)) r]
+        then [treePiece (Fin.ofNat 7 (Int.toNat x)) (Fin.ofNat 4 (Int.toNat y)) r]
         else []
     )
   [((py,4-px),Rot.left),

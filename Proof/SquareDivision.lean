@@ -181,8 +181,7 @@ theorem sq_cors {c : ℝ×ℝ} {sz : NNReal} {i : Cor} : corTransform i '' (squa
     simp
     have h1 {a b:ℝ }:2⁻¹ * a = b ↔ a = 2*b := by norm_num; bound
     have h2 {a b:ℝ }:2⁻¹ * a + 2⁻¹ = b ↔ a = 2*b - 1 := by norm_num; bound
-    have h3 {b:ℝ }:2⁻¹ = b ↔ 1 = 2*b := by norm_num; bound
-    simp [h1,h2,h3]
+    simp [h1,h2]
     norm_num
     bound
   )

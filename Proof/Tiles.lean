@@ -206,9 +206,11 @@ theorem pythag_sq2 : pythagTree ∩ Ioo 3.5 4.5 ×ˢ Ioo 1 2 = d1 '' (Ioo 3 4 ×
   exact (Set.inter_eq_self_of_subset_left d1_sq_in_rect)
 
 theorem tri_half : (⇑(rotTransform Rot.half) '' triangle) = {⟨x,y⟩  | (x<1)  ∧ (y<1) ∧  x+y>1} := by
-  unfold rotTransform Rot.half triangle
+  unfold Rot.half triangle
   ext ⟨ x,y⟩
-  simp
+  simp only [rotTransform.eq_3]
+  simp only [one_div, AffineEquiv.coe_homothetyUnitsMulHom_apply, Units.val_neg, Units.val_one,
+    mem_image, mem_setOf_eq, Prod.exists, gt_iff_lt]
   unfold AffineMap.homothety
   simp
   have h (a:ℝ) : (2⁻¹ - a + 2⁻¹ = x) ↔ (a = 1-x) := by
@@ -232,8 +234,11 @@ theorem tri_left : (⇑(rotTransform Rot.left) '' triangle) = {⟨x,y⟩  | (x<1
   simp [h]
   bound
 theorem tri_right : (⇑(rotTransform Rot.right) '' triangle) = {⟨x,y⟩  | (y<1)  ∧ (0<x) ∧  x<y} := by
-  unfold rotTransform Rot.right triangle
-  simp
+  unfold Rot.right triangle
+  simp only [rotTransform.eq_4]
+  simp only [conj, one_div, AffineEquiv.trans_apply, AffineIsometryEquiv.coe_symm_toAffineEquiv,
+    LinearEquiv.coe_toAffineEquiv, AffineIsometryEquiv.coe_toAffineEquiv,
+    AffineIsometryEquiv.coe_constVAdd, vadd_eq_add]
   ext ⟨ x,y⟩
   simp [AffineIsometryEquiv.constVAdd,rotLeft, AffineIsometryEquiv.symm]
   have h (a:ℝ) : 2⁻¹ + (-a + 2⁻¹) = y ↔ (a = 1-y) := by
@@ -626,9 +631,6 @@ theorem image_inter_switch {α β : Type } (t : Set β) (s u: Set α) (f : α �
 
 theorem AEq (e : (ℝ×ℝ) ≃ᵃ[ℝ ] ℝ×ℝ) : AffineEquiv.toEquiv e = EquivLike.toEquiv e := by
   rfl
-theorem AffineEquiv.coe_toEquiv_symm (e : (ℝ×ℝ) ≃ᵃ[ℝ ] ℝ×ℝ) : e.toEquiv.symm = ↑e.symm := by
-  simp_all only [symm_toEquiv]
-  rfl
 
 -- t = pythagtree
 theorem simp_subsq_pyt
@@ -648,7 +650,7 @@ theorem simp_subsq_pyt
   apply congrArg
   fin_cases cor <;>(
     rw [← AEq]
-    rw [AffineEquiv.symm_toEquiv]
+    rw [← AffineEquiv.toEquiv_symm]
     unfold corTransform'
     unfold corPos at hh
     simp at *
@@ -739,8 +741,8 @@ lemma l6 {a b c d: Set α } : a ⊔ (b ⊔ (c ⊔ d)) = a ∪ b ∪ c ∪ d := b
   simp only [← sup_assoc]
   rfl
 
-lemma finval_eq {n : ℕ } [NeZero n] {a : ℤ }: 0≤ a → a<n → Fin.val (Fin.ofNat' n a.toNat) = (a:ℝ) := by
-  rw [Fin.val_ofNat']
+lemma finval_eq {n : ℕ } [NeZero n] {a : ℤ }: 0≤ a → a<n → Fin.val (Fin.ofNat n a.toNat) = (a:ℝ) := by
+  rw [Fin.val_ofNat]
   intro h1 h2
   rw [← Int.cast_natCast]
   simp only [Int.natCast_emod, Int.ofNat_toNat]
@@ -777,7 +779,7 @@ theorem subt_00
   (p : ℤ × ℤ )
   : (⇑(AffineEquiv.constVAdd ℝ (ℝ × ℝ) (-↑p.1, -↑p.2)) ∘ fun x ↦ (2:ℝ) • x) '' (d0 ∘ d0 '' pythagTree) ∩ usq =
   if 0 ≤ p.2 ∧ p.2 < 7 ∧ 0 ≤ 4 - p.1 ∧ 4 - p.1 < 4 then
-    getTile (Piece.treePiece (Fin.ofNat' 7 p.2.toNat) (Fin.ofNat' 4 (4 - p.1).toNat) «Rot».left)
+    getTile (Piece.treePiece (Fin.ofNat 7 p.2.toNat) (Fin.ofNat 4 (4 - p.1).toNat) «Rot».left)
   else ∅ := by
   by_cases h : 0 ≤ p.2 ∧ p.2 < 7 ∧ 0 ≤ 4 - p.1 ∧ 4 - p.1 < 4
   . rw [if_pos h]
@@ -794,7 +796,7 @@ theorem subt_00
     -- have hp := d00_pyt_in_rect
     apply Eq.trans (inter_preimage_image_inter usq _ _ _ _) (image_empty _)
     rw [shift_sq]
-    apply Set.eq_empty_of_forall_not_mem
+    apply Set.eq_empty_of_forall_notMem
     intro ⟨x,y ⟩
     intro h
     rw [mem_inter_iff] at h
@@ -828,7 +830,7 @@ theorem subt_01
   (p : ℤ × ℤ )
 : (⇑(AffineEquiv.constVAdd ℝ (ℝ × ℝ) (-↑p.1, -↑p.2)) ∘ fun x ↦ (2:ℝ) • x) '' (d0 ∘ d1 '' pythagTree) ∩ usq =
   if 0 ≤ p.1 - 2 ∧ p.1 - 2 < 7 ∧ 0 ≤ p.2 - 4 ∧ p.2 - 4 < 4 then
-    getTile (Piece.treePiece (Fin.ofNat' 7 (p.1 - 2).toNat) (Fin.ofNat' 4 (p.2 - 4).toNat) «Rot».none)
+    getTile (Piece.treePiece (Fin.ofNat 7 (p.1 - 2).toNat) (Fin.ofNat 4 (p.2 - 4).toNat) «Rot».none)
   else ∅ := by
   by_cases h : 0 ≤ p.1 - 2 ∧ p.1 - 2 < 7 ∧ 0 ≤ p.2 - 4 ∧ p.2 - 4 < 4
   . rw [if_pos h]
@@ -844,7 +846,7 @@ theorem subt_01
     -- have hp := d00_pyt_in_rect
     apply Eq.trans (inter_preimage_image_inter usq _ _ _ _) (image_empty _)
     rw [shift_sq]
-    apply Set.eq_empty_of_forall_not_mem
+    apply Set.eq_empty_of_forall_notMem
     intro ⟨x,y ⟩
     intro h
     rw [mem_inter_iff] at h
@@ -878,7 +880,7 @@ theorem subt_10
   (p : ℤ × ℤ )
 : (⇑(AffineEquiv.constVAdd ℝ (ℝ × ℝ) (-↑p.1, -↑p.2)) ∘ fun x ↦ (2:ℝ) • x) '' (d1 ∘ d0 '' pythagTree) ∩ usq =
   if 0 ≤ p.1 - 5 ∧ p.1 - 5 < 7 ∧ 0 ≤ p.2 - 4 ∧ p.2 - 4 < 4 then
-    getTile (Piece.treePiece (Fin.ofNat' 7 (p.1 - 5).toNat) (Fin.ofNat' 4 (p.2 - 4).toNat) «Rot».none)
+    getTile (Piece.treePiece (Fin.ofNat 7 (p.1 - 5).toNat) (Fin.ofNat 4 (p.2 - 4).toNat) «Rot».none)
   else ∅ := by
   by_cases h : 0 ≤ p.1 - 5 ∧ p.1 - 5 < 7 ∧ 0 ≤ p.2 - 4 ∧ p.2 - 4 < 4
   . rw [if_pos h]
@@ -894,7 +896,7 @@ theorem subt_10
     -- have hp := d00_pyt_in_rect
     apply Eq.trans (inter_preimage_image_inter usq _ _ _ _) (image_empty _)
     rw [shift_sq]
-    apply Set.eq_empty_of_forall_not_mem
+    apply Set.eq_empty_of_forall_notMem
     intro ⟨x,y ⟩
     intro h
     rw [mem_inter_iff] at h
@@ -911,15 +913,17 @@ theorem subt_10
     simp at h1
     bound
 
+#check rotTransform
+#check rotTransform.eq_4
+
 lemma lemt11 (p1 p2 : ℤ ):
 /-(⇑(AffineEquiv.constVAdd ℝ (ℝ × ℝ) (-↑p1, -↑p2)) ∘ fun x ↦ (2:ℝ) • x) ∘ d0 ∘ d0  =
   ⇑(rotTransform «Rot».left) ∘-/
 (⇑(AffineEquiv.constVAdd ℝ (ℝ × ℝ) (-↑p1, -↑p2)) ∘ fun x ↦ (2:ℝ) • x) ∘ d1 ∘ d1 =
   ⇑(rotTransform «Rot».right) ∘ ⇑(AffineEquiv.constVAdd ℝ (ℝ × ℝ) (-↑(6-p2), -↑(p1 - 9))) := by
-    simp only [rotTransform,Rot.right]
-    simp only [conj, one_div, AffineIsometryEquiv.toAffineEquiv_symm, AffineEquiv.trans_apply,
-    AffineIsometryEquiv.coe_toAffineEquiv, LinearEquiv.coe_toAffineEquiv,
-    AffineIsometryEquiv.coe_constVAdd, vadd_eq_add]
+    unfold Rot.right
+    rw [rotTransform.eq_4]
+    simp only [conj, one_div]
     ext ⟨x,y⟩
     simp only [Function.comp_apply, d0, Prod.smul_mk, smul_eq_mul, AffineEquiv.constVAdd_apply,
       vadd_eq_add, Prod.mk_add_mk, AffineIsometryEquiv.symm, AffineIsometryEquiv.constVAdd,
@@ -946,7 +950,7 @@ theorem subt_11
   (p : ℤ × ℤ )
   : (⇑(AffineEquiv.constVAdd ℝ (ℝ × ℝ) (-↑p.1, -↑p.2)) ∘ fun x ↦ (2:ℝ) • x) '' (d1 ∘ d1 '' pythagTree) ∩ usq =
   if 0 ≤ 6-p.2 ∧ 6-p.2 < 7 ∧ 0 ≤ p.1-9 ∧ p.1-9 < 4 then
-    getTile (Piece.treePiece (Fin.ofNat' 7 (6-p.2).toNat) (Fin.ofNat' 4 (p.1-9).toNat) «Rot».right)
+    getTile (Piece.treePiece (Fin.ofNat 7 (6-p.2).toNat) (Fin.ofNat 4 (p.1-9).toNat) «Rot».right)
   else ∅ := by
   by_cases h : 0 ≤ 6-p.2 ∧ 6-p.2 < 7 ∧ 0 ≤ p.1-9 ∧ p.1-9 < 4
   . rw [if_pos h]
@@ -963,7 +967,7 @@ theorem subt_11
     -- have hp := d00_pyt_in_rect
     apply Eq.trans (inter_preimage_image_inter usq _ _ _ _) (image_empty _)
     rw [shift_sq]
-    apply Set.eq_empty_of_forall_not_mem
+    apply Set.eq_empty_of_forall_notMem
     intro ⟨x,y ⟩
     intro h
     rw [mem_inter_iff] at h

@@ -32,7 +32,7 @@ theorem linear_cont (g : (ℝ × ℝ) →ₗ[ℝ] (ℝ × ℝ)) : Continuous g :
   --aesop
   let e := ContinuousLinearEquiv.finTwoArrow ℝ ℝ
   have h : g =  g ∘ₗ e.toLinearMap ∘ₗ e.symm.toLinearMap := by
-    simp_all only [ContinuousLinearEquiv.symm_toLinearEquiv, LinearEquiv.comp_coe, LinearEquiv.symm_trans_self,
+    simp_all only [ContinuousLinearEquiv.toLinearEquiv_symm, LinearEquiv.comp_coe, LinearEquiv.symm_trans_self,
       LinearEquiv.refl_toLinearMap, LinearMap.comp_id, e]
   rw [h]
   apply Continuous.comp (LinearMap.continuous_on_pi (g ∘ₗ e.toLinearMap))

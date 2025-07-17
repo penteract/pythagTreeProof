@@ -1,4 +1,53 @@
 import Mathlib
+
+-- what happened here?
+
+noncomputable def f (rot : ZMod 4) : ℕ := match rot with
+  | 0 => 1
+  | 1 => 2
+  | 2 => 3
+  | 3 => 4
+
+
+--work
+example : f 0 = 1 := by
+  simp [f]
+example : f 1 = 2 := by
+  simp [f]
+
+--don't work
+example : f 2 = 3 := by
+  simp [f]
+example : f 3 = 4 := by
+  simp [f]
+/-
+unsolved goals
+⊢ (match 3 with
+    | 0 => 1
+    | 1 => 2
+    | 2 => 3
+    | 3 => 4) =
+    4
+-/
+example : f 2 = 3 := by
+  simp [f.eq_3]
+example : f 3 = 4 := by
+  simp [f.eq_4]
+
+--state at which lean process killed after leaving it to run all night:
+-- top:
+-- 2989441 toby      20   0 7407040   4.6g   4.2g S  98.8  19.7      7,16 lean
+
+-- terminal:
+-- ..pythagTree/formalproof (git)-[master] % lake build
+-- ...
+-- ⚠ [6984/6988] Replayed Proof.TileAreaOpt
+-- ...
+-- ⣽ [6985/6988] Running Proof.CertProof (+ 0 more)^C
+-- lake build  1.79s user 3.55s system 0% cpu 7:29:16.65 total
+
+-- with body of  allParts_makes_eqn replaced by sorry: 27 seconds
+
 -- Why is this not computable?
 noncomputable def d0_lin : ℝ × ℝ  →ₗ[ℝ] ℝ × ℝ := Matrix.toLin (Basis.finTwoProd _) (Basis.finTwoProd _) !![1, 2 ; 3, 4 ]
 
@@ -14,6 +63,8 @@ instance : Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin n)) = n) where
 noncomputable section
 
 macro "R2" : term => `(ℝ × ℝ)
+
+
 
 lemma fnrnk : Module.finrank ℝ (EuclideanSpace ℝ (Fin n)) = n := by
   rw [finrank_euclideanSpace, Fintype.card_fin]
