@@ -14,8 +14,11 @@ set_option maxRecDepth 200000
 
 
 def pyt_eqns : List (List (List Piece × ℚ ) × ℚ)  := allparts.map Eqns.fromAllParts
-def bigMat : Matrix (pyt_eqns).toFinset
-                    (Eqns.all_vars (pyt_eqns)).toFinset
+-- without defining these explicitly, Lean 4.22-rc3 tries to reevaluate them an awful lot of times
+def eqfs : Finset (List (List Piece × ℚ ) × ℚ)  := (pyt_eqns).toFinset
+def avfs : Finset (List Piece) := (Eqns.all_vars (pyt_eqns)).toFinset
+def bigMat : Matrix eqfs
+                    avfs
                     ℚ := Eqns.getMat (pyt_eqns)
 
 
@@ -31,15 +34,15 @@ theorem allParts_describes_pyt : ∀ p ∈ allparts, p.2.1 = List.map (fun r => 
 -- This uses the coefficients in allparts to combine the equations into the one we care about
 -- which gives the area of the Pythagoras tree
 
+--#eval! (Eqns.mergeFold (List.mergeSort (Eqns.toCoeffs pyt_eqns)))
 theorem allParts_makes_eqn :
     Matrix.vecMul (fun e => e.val.snd) bigMat =
     (fun v => if v.val=[] then -Eqns.qEmpty else
               if v.val=[Piece.fullPiece] then -Eqns.qFull else
               if v.val ∈ init then 1 else 0 ) := by
   unfold bigMat pyt_eqns Eqns.fromAllParts
-  sorry
-  -- with_unfolding_all native_decide
-
+  -- sorry
+  with_unfolding_all native_decide
 
 
 def eqn_parts := ([]::[Piece.fullPiece]::init).toFinset

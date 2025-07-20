@@ -164,7 +164,7 @@ theorem bigMat_vol_is_system :
   simp only [Matrix.mulVec_eq_sum, op_smul_eq_smul]
   ext eqn
   obtain ⟨ e, einmap ⟩ := eqn
-  unfold pyt_eqns at einmap
+  unfold eqfs pyt_eqns at einmap
   simp only [List.mem_toFinset, List.mem_map, Prod.exists] at einmap
   obtain ⟨ a,b,q,abqinallparts,edef⟩ := einmap
   simp only [Pi.zero_apply]
@@ -239,6 +239,7 @@ theorem vol_inits_val' : List.sum (List.map vol' init) = Eqns.qFull * vol' [Piec
     (fun (v : (Eqns.all_vars pyt_eqns).toFinset) ↦
       ((↑): ℚ→ℝ) (if v.val = [] then -Eqns.qEmpty else if ↑v = [Piece.fullPiece] then -Eqns.qFull else if ↑v ∈ init then 1 else 0) )
     = (fun v ↦ ↑(if v = [] then -Eqns.qEmpty else if v = [Piece.fullPiece] then -Eqns.qFull else if v ∈ init then 1 else 0)) ∘ Subtype.val := by rfl
+  unfold avfs at h
   rw [fn_eq_comp] at h
   -- rw [← thmst] at h
   simp only [apply_ite Rat.cast, Rat.cast_neg, Rat.cast_one, Rat.cast_zero, ite_mul, neg_mul,

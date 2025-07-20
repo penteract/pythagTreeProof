@@ -16,4 +16,4 @@ The proof depends on Lean.ofReduceBool because it uses `native_decide` in Proof/
 
 If you don't already have lake installed (a tool which makes sure you're using the right versions of lean and mathlib), you will need to install [elan](https://github.com/leanprover/elan).
 
-With that installed `lake build` should verify the proof. This may take some time. Rebuilding the proof takes up to 500 seconds on my machine, but it may take longer if you haven't already built Mathlib.
+With that installed `lake build` should verify the proof. This may take some time. Rebuilding the proof takes up to 500 seconds on my machine, but it may take much longer if you haven't already built Mathlib.
