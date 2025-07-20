@@ -6,23 +6,7 @@ open List
 
 namespace Eqns
 
-variable {α β : Type}
--- variable (ll : List (List (α × ℚ) × ℚ)) -- represents a list of equations and coefficients of said equations
--- variable (toEqn : β → List (α × ℚ) )
--- variable (f : α → ℝ )
-
-def all_vars [DecidableEq α] (ll : List (List (α × ℚ) × ℚ)) : List α := dedup ((flatMap Prod.fst ll ).map Prod.fst)
-
--- def Mat (ll : List (List (α × ℚ) × ℚ)) := Matrix { e // e∈ ll} {v // v ∈ (all_vars ll)}  ℚ
-
-/-
-def getMat (ll : List (List (α × ℚ) × ℚ)) :  Matrix { e // e∈ ll} {v // v ∈ (all_vars ll)} ℚ := Matrix.of
-  (fun e v => sum (e.val.fst.map (fun (a,q) =>if a=v then q else 0 )))
--/
-def getMat [DecidableEq α] (ll : List (List (α × ℚ) × ℚ)) :  Matrix ll.toFinset (all_vars ll).toFinset ℚ := Matrix.of
-  (fun e v => sum (e.val.fst.map (fun (a,q) =>if a=v then q else 0 )))
-
-
+variable {α : Type}
 
 def fromAllParts : (α× (List α) × ℚ) → (List (α × ℚ) × ℚ)  := (fun x ↦
           match x with
@@ -32,34 +16,8 @@ def qFull:  ℚ := 1282341301154741436886299752561669174104157968892079433136395
 def qEmpty:  ℚ := 11746934357449947552830291532943152290456105411186011016486060686616960007897677336844906536622212814156785625/877512406035620068631903180662851572553488753575243048137500508983979170248733422547196905684808937723408093
 
 
-theorem vecMulToList [DecidableEq α] (l : List (List (α × ℚ) × ℚ)) (h : Nodup l) :
-  Matrix.vecMul (fun e => e.val.2) (getMat l)
-  = fun v => List.sum (l.map (fun (((a:List (α × ℚ )),(q:ℚ) ))
-                => List.sum (a.map fun ((v':α),(r:ℚ)) => if v'=v.val then q*r else (0:ℚ)))) := by
-  rw [Matrix.vecMul_eq_sum]
-  ext v
-  rw [Finset.sum_apply]
-  simp only [Pi.smul_apply]
-  unfold getMat
-  simp only [ Matrix.of_apply, smul_eq_mul]
-  rw [← List.sum_toFinset _ h]
-  simp only [← List.sum_map_mul_left]
-  simp only [mul_ite, mul_zero]
-  nth_rw 2 [← Finset.sum_finset_coe]
-  rfl
-  -- simp only [Finset.sum_subtype_of_mem (fun x => (map (fun b ↦ if b.1 = ↑v then (x).2 * b.2 else 0) (x).1).sum )]
-  -- rw [smul_eq_mul]
-  -- simp only [Finset.univ_eq_attach, Finset.sum_apply, Pi.smul_apply, smul_eq_mul]
-
 def toCoeffs (l : List (List (α × ℚ) × ℚ)) : List (α × ℚ) := l.flatMap (fun (a,q) => a.map (fun (x,p) => (x,q*p)))
 
-/-
-lemma tistFnAlt [DecidableEq α] (l : List (List (α × ℚ) × ℚ)) : (fun (v : { x // x ∈ (all_vars l).toFinset }) =>
-    List.sum (l.map (fun (((a:List (α × ℚ )),(q:ℚ) )) =>
-      List.sum (a.map fun ((v':α),(r:ℚ)) => if v'=v.val then q*r else (0:ℚ)))))
-  = fun v => List.sum (List.map (fun (v',r) => if v'=v.val then r else (0:ℚ))  (toCoeffs l))
-    := by
-  sorry -/
 
 -- evaluate a linear equation of variabes and coefficients at a function assigning values to variables
 def evalWith (f:α → ℝ ) (l : List (α × ℚ)) : ℝ  := List.sum (List.map (fun y => y.2 * f y.1 ) l)
@@ -79,26 +37,42 @@ theorem mulEq (l : List (α × ℚ)) (q :ℚ ) (h : evalWith f l = 0)
   rw [h]
   exact (mul_zero _)
 
-theorem appendEq (h1 : evalWith f l1 = 0) (h2 : evalWith f l2 = 0) : evalWith f (l1++l2) = 0 := by
+theorem appendEq : evalWith f (l1++l2) = evalWith f l1 + evalWith f l2 := by
+  unfold evalWith at *
+  rw [List.map_append, List.sum_append]
+
+theorem appendEq_z (h1 : evalWith f l1 = 0) (h2 : evalWith f l2 = 0) : evalWith f (l1++l2) = 0 := by
   unfold evalWith at *
   rw [List.map_append, List.sum_append]
   simp [h1,h2]
 
-theorem sortEq {f} {l : (List (α × ℚ)) } [LE α]  [DecidableRel (· ≤ · : α → α → Prop)]
-    : evalWith f (List.mergeSort l (fun x y => (x ≤ y )) ) = evalWith f l := by
-  unfold evalWith
-  rw [List.Perm.sum_eq (List.Perm.map _ (List.mergeSort_perm l _))]
+
+theorem permEq (p : List.Perm l l') : evalWith f l = evalWith f l' :=
+  List.Perm.sum_eq (List.Perm.map _ p)
+
+theorem sortEq {f} {l : (List (α × ℚ)) } [LT α] [hdec: DecidableRel (· ≤ · : (α×ₗℚ) → (α×ₗℚ) → Prop)]
+    : evalWith f (List.mergeSort l (fun x y => @decide (toLex x ≤ toLex y) (hdec x y)) ) = evalWith f l :=
+  permEq (List.mergeSort_perm l _)
 
 theorem mergeOneEq : evalWith f ((x,q)::(x,q')::l)  = evalWith f ((x,q+q')::l) := by
-  unfold evalWith
-  simp only [map_cons, sum_cons, Rat.cast_add]
-  rw [← add_assoc,← right_distrib]
+  simp only [evalWithCons]
+  rw [← add_assoc,← right_distrib,Rat.cast_add]
+
 
 def mergeFold [DecidableEq α ] : ( List (α × ℚ)) →  List (α×ℚ) -- := match l with
   | List.cons (a ,q) (List.cons (b,q') tl) => if a=b then mergeFold ((a,q+q') :: tl) else (a,q)::mergeFold ((b,q')::tl)
   | other => other
 termination_by  l => l.length
 
+def mergeFold_acc [DecidableEq α ] (acc : List (α × ℚ)) : (List (α × ℚ)) →  List (α×ℚ) -- := match l with
+  | List.cons (_ ,0) tl => mergeFold_acc acc tl
+  | List.cons (a ,q) (List.cons (b,q') tl) => if a=b then mergeFold_acc acc ((a,q+q') :: tl) else mergeFold_acc ((a,q)::acc) ((b,q')::tl)
+  | other => (acc) ++ other
+termination_by  l => l.length
+/-
+theorem mergeFold_eq_acc [DecidableEq α] {l:List (α × ℚ)} : mergeFold_acc xs l = xs.reverse ++ mergeFold l := by
+  sorry
+-/
 theorem list_length_induction (p : List α → Prop) (hind : ∀ l:List α, (∀ l':List α, l'.length < l.length → p l')→ p l) (l:List α) : p l := by
   have h : ∀ n:ℕ , ∀ l : List α, l.length≤n → p l := by
     intro n
@@ -142,6 +116,39 @@ theorem mergeEq [DecidableEq α ] {l : List (α × ℚ) }: evalWith f l = evalWi
   | List.cons x nil => unfold mergeFold ; simp
   | List.nil => unfold mergeFold ; simp
 
+theorem mergeEq_acc [DecidableEq α ] {l : List (α × ℚ) }: evalWith f (xs++l) = evalWith f (mergeFold_acc xs l) := by
+  refine (list_length_induction (p:= fun l => ∀ xs', evalWith f (xs'++l) = evalWith f (mergeFold_acc xs' l)) ?_ l) xs
+  intro l
+  intro h
+  unfold  mergeFold_acc
+  split <;> intro xs'
+  case h_1 tl =>
+    simp only [Int.ofNat_eq_coe, CharP.cast_eq_zero, Rat.mk_den_one, Int.cast_zero]
+    rw [appendEq]
+
+    rw [evalWithCons]
+    ring_nf
+    rw [← appendEq]
+    rw [h]
+    simp
+  case h_2 a q b q' tl hh =>
+    by_cases he : a=b
+    . simp_all only [length_cons, ↓reduceIte]
+      rw [← h ((b, q + q') :: tl) ]
+      rw [appendEq,appendEq]
+      rw [mergeOneEq]
+      simp
+    . simp_all only [length_cons, ↓reduceIte]
+      rw [appendEq]
+      rw [evalWithCons]
+      rw [← h ((b, q') :: tl)]
+      rw [appendEq]
+      nth_rw 2 [evalWithCons]
+      ring
+      simp
+  case h_3 =>
+    simp only
+
 theorem eval_toCoeffs  (l : List (List (α × ℚ) × ℚ) ) (f : α → ℝ)
     (h : ∀ x ∈ l, evalWith f  x.1 = (0:ℝ) )
     : evalWith f (toCoeffs l) = 0  := by
@@ -151,7 +158,7 @@ theorem eval_toCoeffs  (l : List (List (α × ℚ) × ℚ) ) (f : α → ℝ)
            simp
   | cons hd tl tail_ih =>
     simp
-    apply appendEq
+    apply appendEq_z
     . apply mulEq
       exact h (_) (by simp)
     simp at tail_ih
@@ -164,9 +171,13 @@ theorem eval_toCoeffs  (l : List (List (α × ℚ) × ℚ) ) (f : α → ℝ)
     apply right
     · exact a_1
 
-theorem eval_toCoeffs_merged [DecidableEq α ] [LE α] [DecidableRel (· ≤ · : α → α → Prop)] (l : List (List (α × ℚ) × ℚ) ) (f : α → ℝ)
+theorem eval_toCoeffs_merged [DecidableEq α ] [LT α] [DecidableRel (· < · : α → α → Prop)] (l : List (List (α × ℚ) × ℚ) ) (f : α → ℝ)
     (h : ∀ x ∈ l, evalWith f  x.1 = (0:ℝ) )
-    : evalWith f (mergeFold (mergeSort (toCoeffs l))) = 0  := by
-  rw [← mergeEq]
-  rw [sortEq]
+    : evalWith f (mergeFold_acc [] (mergeSort (toCoeffs l)
+          (fun x y => @decide (toLex x ≤ toLex y) (Prod.Lex.instDecidableRelOfDecidableEq x y))))
+      = 0 := by
+  rw [← mergeEq_acc]
+  rw [appendEq_z]
+  . unfold evalWith ; simp
+  rw [sortEq (hdec:= _)]
   rw [eval_toCoeffs l f h]
